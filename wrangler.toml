@@ -1,0 +1,5 @@
+name = "pixel-quilt"
+compatibility_date = "2025-12-27"
+
+[site]
+bucket = "./dist"
