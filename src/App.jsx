@@ -27,6 +27,9 @@ function App() {
     // Set immediately
     setAppHeight()
 
+    // Prevent pull-to-refresh on mobile
+    document.body.style.overscrollBehavior = 'none'
+
     // Only recalculate on actual window resize (orientation change), not during interactions
     let resizeTimeout
     const handleResize = () => {
@@ -38,6 +41,7 @@ function App() {
     return () => {
       clearTimeout(resizeTimeout)
       window.removeEventListener('resize', handleResize)
+      document.body.style.overscrollBehavior = ''
     }
   }, [])
 
@@ -116,7 +120,7 @@ function App() {
   }, [history, editingSquare])
 
   return (
-    <div className="min-h-screen p-2 sm:p-4 md:p-8" style={{ backgroundColor: '#121212' }}>
+    <div className="min-h-screen p-2 sm:p-4 md:p-8" style={{ backgroundColor: '#121212', overscrollBehavior: 'none' }}>
       <div className="max-w-6xl mx-auto">
         <div style={{
           display: 'flex',

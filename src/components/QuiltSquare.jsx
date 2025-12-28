@@ -122,7 +122,8 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         position: 'relative',
         boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),
         transition: 'box-shadow 0.15s ease',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        touchAction: isMobile ? 'pan-y' : 'auto'
       }}
     >
       <>
