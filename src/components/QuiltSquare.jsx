@@ -1,13 +1,20 @@
+import { useState, useRef } from 'react'
+
 function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false, isMobile = false }) {
+  const [isHovering, setIsHovering] = useState(false)
+  const longPressTimer = useRef(null)
+  const touchStartPos = useRef(null)
+
   const checkLowerLeftCorner = (clientX, clientY, rect) => {
     const x = clientX - rect.left
     const y = clientY - rect.top
-    // Much larger touch target on mobile (50% vs 20%)
-    const threshold = isMobile ? 0.5 : 0.2
+    const threshold = 0.2
     return (x < rect.width * threshold) && (y > rect.height * (1 - threshold))
   }
 
   const handleMouseDown = (e) => {
+    if (isMobile) return // Desktop only
+
     const rect = e.currentTarget.getBoundingClientRect()
     const isLowerLeft = checkLowerLeftCorner(e.clientX, e.clientY, rect)
 
@@ -19,18 +26,49 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
   }
 
   const handleTouchStart = (e) => {
+    // Mobile: long-press to drag, tap to open editor
     const touch = e.touches[0]
-    const rect = e.currentTarget.getBoundingClientRect()
-    const isLowerLeft = checkLowerLeftCorner(touch.clientX, touch.clientY, rect)
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY }
 
-    if (isLowerLeft) {
+    // Start long-press timer (300ms)
+    longPressTimer.current = setTimeout(() => {
       e.preventDefault()
-      e.stopPropagation()
       onDragStart({ x: touch.clientX, y: touch.clientY })
+    }, 300)
+  }
+
+  const handleTouchMove = (e) => {
+    // Cancel long-press if finger moves significantly
+    if (longPressTimer.current && touchStartPos.current) {
+      const touch = e.touches[0]
+      const dx = touch.clientX - touchStartPos.current.x
+      const dy = touch.clientY - touchStartPos.current.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      if (distance > 10) {
+        clearTimeout(longPressTimer.current)
+        longPressTimer.current = null
+      }
     }
   }
 
+  const handleTouchEnd = () => {
+    // Clear timer if released before long-press completes
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    touchStartPos.current = null
+  }
+
   const handleClick = (e) => {
+    // Desktop: only open editor if not clicking corner
+    // Mobile: always open editor on tap (drag requires long-press)
+    if (isMobile) {
+      onClick()
+      return
+    }
+
     const rect = e.currentTarget.getBoundingClientRect()
     const isLowerLeft = checkLowerLeftCorner(e.clientX, e.clientY, rect)
 
@@ -45,7 +83,14 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      onMouseEnter={onMouseEnter}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      onMouseEnter={() => {
+        setIsHovering(true)
+        onMouseEnter()
+      }}
+      onMouseLeave={() => setIsHovering(false)}
       style={{
         width: '100%',
         aspectRatio: '1',
@@ -152,20 +197,6 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
             }
           `}</style>
 
-          {/* Subtle corner indicator (always visible) */}
-          {!isPoweredUp && (
-            <div style={{
-              position: 'absolute',
-              bottom: '0',
-              left: '0',
-              width: isMobile ? '50%' : '20%',
-              height: isMobile ? '50%' : '20%',
-              borderLeft: isMobile ? '3px solid rgba(59, 130, 246, 0.5)' : '2px solid rgba(59, 130, 246, 0.3)',
-              borderBottom: isMobile ? '3px solid rgba(59, 130, 246, 0.5)' : '2px solid rgba(59, 130, 246, 0.3)',
-              pointerEvents: 'none',
-              background: isMobile ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 50%)' : 'none'
-            }} />
-          )}
 
           {/* Powered-up corner glow (only after editing) */}
           {isPoweredUp && (
@@ -180,6 +211,24 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
               borderRadius: '0 100% 0 0',
               transformOrigin: 'bottom left'
             }} />
+          )}
+
+          {/* Copy icon on desktop hover */}
+          {!isMobile && isHovering && (
+            <div style={{
+              position: 'absolute',
+              bottom: '0',
+              left: '0',
+              fontSize: '32px',
+              opacity: 0.85,
+              pointerEvents: 'none',
+              zIndex: 2,
+              textShadow: '0 2px 6px rgba(0, 0, 0, 0.5)',
+              transition: 'opacity 0.15s ease',
+              lineHeight: '1'
+            }}>
+              ⎘
+            </div>
           )}
         </>
         )}

@@ -42,9 +42,9 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   }, [dragState.isDragging])
 
   const handleDragStart = (index, pos) => {
-    // Haptic feedback on mobile
+    // Haptic feedback on mobile - stronger pulse
     if (navigator.vibrate) {
-      navigator.vibrate(50)
+      navigator.vibrate(150)
     }
 
     setDragState({
