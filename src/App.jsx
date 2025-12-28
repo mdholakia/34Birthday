@@ -146,8 +146,8 @@ function App() {
               onClick={() => setShowChatModal(true)}
               style={{
                 minWidth: '44px',
-                minHeight: '44px',
-                padding: '8px',
+                height: '44px',
+                padding: '10px',
                 backgroundColor: '#ffffff',
                 color: '#1f2937',
                 border: '2px solid #6b7280',
@@ -168,7 +168,7 @@ function App() {
               <button
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
                 style={{
-                  minHeight: '44px',
+                  height: '44px',
                   padding: '10px 14px',
                   backgroundColor: isPreviewMode ? '#3b82f6' : '#ffffff',
                   color: isPreviewMode ? '#ffffff' : '#1f2937',
