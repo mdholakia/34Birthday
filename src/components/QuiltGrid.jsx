@@ -112,7 +112,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
           gridAutoRows: '1fr',
           width: '100%',
           position: 'relative',
-          touchAction: isPreviewMode ? 'auto' : 'none',
+          touchAction: isPreviewMode ? 'auto' : (dragState.isDragging ? 'none' : 'auto'),
           contain: 'layout paint',
           transition: 'width 0.3s ease, border 0.3s ease',
           border: isPreviewMode ? '1px solid #d1d5db' : 'none',

@@ -1,9 +1,14 @@
 import { useState, useRef } from 'react'
 
+// Motion detection thresholds for mobile touch gestures
+const HORIZONTAL_DRAG_THRESHOLD = 25 // px
+const VERTICAL_SCROLL_THRESHOLD = 35 // px
+const CANCEL_THRESHOLD = 10 // px
+
 function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false, isMobile = false }) {
   const [isHovering, setIsHovering] = useState(false)
-  const longPressTimer = useRef(null)
   const touchStartPos = useRef(null)
+  const touchMode = useRef(null) // 'drag' | 'scroll' | null
 
   const checkLowerLeftCorner = (clientX, clientY, rect) => {
     const x = clientX - rect.left
@@ -26,46 +31,62 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
   }
 
   const handleTouchStart = (e) => {
-    // Mobile: long-press to drag, tap to open editor
+    // Mobile: track touch position for motion-based detection
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
-
-    // Start long-press timer (300ms)
-    longPressTimer.current = setTimeout(() => {
-      e.preventDefault()
-      onDragStart({ x: touch.clientX, y: touch.clientY })
-    }, 300)
+    touchMode.current = null // Reset mode for new touch
   }
 
   const handleTouchMove = (e) => {
-    // Cancel long-press if finger moves significantly
-    if (longPressTimer.current && touchStartPos.current) {
-      const touch = e.touches[0]
-      const dx = touch.clientX - touchStartPos.current.x
-      const dy = touch.clientY - touchStartPos.current.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
+    // Motion-based detection: horizontal drag vs vertical scroll
+    if (!touchStartPos.current) return
 
-      if (distance > 10) {
-        clearTimeout(longPressTimer.current)
-        longPressTimer.current = null
-      }
+    const touch = e.touches[0]
+    const dx = Math.abs(touch.clientX - touchStartPos.current.x)
+    const dy = Math.abs(touch.clientY - touchStartPos.current.y)
+
+    // Ignore tiny movements
+    if (dx < CANCEL_THRESHOLD && dy < CANCEL_THRESHOLD) return
+
+    // If mode already locked, maintain it (prevents jarring mode switches)
+    if (touchMode.current === 'scroll') {
+      return // Allow browser scrolling
+    }
+
+    if (touchMode.current === 'drag') {
+      e.preventDefault() // Continue preventing scroll
+      return // QuiltGrid handles drag position updates
+    }
+
+    // Mode not decided yet - first threshold to exceed wins ("first-past-the-post")
+    if (dy > VERTICAL_SCROLL_THRESHOLD) {
+      touchMode.current = 'scroll'
+      touchStartPos.current = null
+      return // Allow scroll, cancel any drag potential
+    }
+
+    if (dx > HORIZONTAL_DRAG_THRESHOLD) {
+      touchMode.current = 'drag'
+      e.preventDefault() // Start preventing scroll NOW
+      onDragStart({ x: touch.clientX, y: touch.clientY })
     }
   }
 
   const handleTouchEnd = () => {
-    // Clear timer if released before long-press completes
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
+    // If no mode was ever chosen, treat as tap → open editor
+    if (touchStartPos.current && touchMode.current === null) {
+      onClick()
     }
+
+    // Reset all state for next touch
     touchStartPos.current = null
+    touchMode.current = null
   }
 
   const handleClick = (e) => {
     // Desktop: only open editor if not clicking corner
-    // Mobile: always open editor on tap (drag requires long-press)
+    // Mobile: handled by handleTouchEnd (not this click handler)
     if (isMobile) {
-      onClick()
       return
     }
 
