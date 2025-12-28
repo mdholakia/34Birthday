@@ -7,12 +7,15 @@ import { db } from './firebase'
 function App() {
   const [squares, setSquares] = useState(
     Array(36).fill(null).map(() =>
-      Array(16).fill(null).map(() => Array(16).fill('white'))
+      Array(16).fill(null).map(() => Array(16).fill('#F5EFEE'))
     )
   )
   const [history, setHistory] = useState([])
   const [editingSquare, setEditingSquare] = useState(null)
   const [showToast, setShowToast] = useState(false)
+  const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [showChatModal, setShowChatModal] = useState(false)
+  const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
 
   const saveToHistory = () => {
     setHistory(prev => [...prev, JSON.parse(JSON.stringify(squares))])
@@ -24,6 +27,9 @@ function App() {
     newSquares[index] = newPixels
     setSquares(newSquares)
     set(ref(db, 'squares'), newSquares)
+
+    // Add powerup animation to this square
+    setPoweredUpSquares(prev => new Set([...prev, index]))
   }
 
   const copySquarePattern = (fromIndex, toIndex) => {
@@ -34,6 +40,13 @@ function App() {
     newSquares[toIndex] = JSON.parse(JSON.stringify(squares[fromIndex]))
     setSquares(newSquares)
     set(ref(db, 'squares'), newSquares)
+
+    // Remove powerup from source square (it's been used!)
+    setPoweredUpSquares(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(fromIndex)
+      return newSet
+    })
 
     // Show toast
     setShowToast(true)
@@ -79,21 +92,99 @@ function App() {
   }, [history, editingSquare])
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-          Pixel Quilt
-        </h1>
+        <div style={{
+          display: 'flex',
+          color: 'white',
+          backgroundColor: '#121212',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '2px solid #e5e7eb',
+          padding: '12px 16px',
+          gap: '8px',
+          flexWrap: 'wrap'
+        }}>
+          <h1 className="text-3xl font-bold text-gray-900"
+          style={{
+            fontSize: window.innerWidth < 375 ? '22px' : '28px',
+            margin: 0
+          }}>
+            Pixel Quilt
+          </h1>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <button
+              onClick={() => setShowChatModal(true)}
+              style={{
+                minWidth: '44px',
+                minHeight: '44px',
+                padding: '8px',
+                backgroundColor: '#ffffff',
+                color: '#1f2937',
+                border: '2px solid #6b7280',
+                borderRadius: '6px',
+                fontSize: '20px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Chat"
+            >
+              💬
+            </button>
+
+            {editingSquare === null && (
+              <button
+                onClick={() => setIsPreviewMode(!isPreviewMode)}
+                style={{
+                  minHeight: '44px',
+                  padding: '10px 14px',
+                  backgroundColor: isPreviewMode ? '#3b82f6' : '#ffffff',
+                  color: isPreviewMode ? '#ffffff' : '#1f2937',
+                  border: '2px solid #3b82f6',
+                  borderRadius: '6px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>{isPreviewMode ? '✓' : '👁'}</span>
+                <span style={{ display: window.innerWidth < 375 ? 'none' : 'inline' }}>
+                  {isPreviewMode ? 'Exit Preview' : 'Preview'}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
 
         <div style={{
-          overflow: 'auto',
+          overflow: isPreviewMode ? 'visible' : 'auto',
           width: '100%',
-          maxHeight: 'calc(100vh - 150px)'
+          height: isPreviewMode ? 'auto' : 'auto',
+          maxHeight: isPreviewMode ? 'none' : 'calc(100vh - 150px)',
+          display: isPreviewMode ? 'flex' : 'block',
+          alignItems: isPreviewMode ? 'center' : 'stretch',
+          justifyContent: isPreviewMode ? 'center' : 'flex-start',
+          padding: isPreviewMode ? '20px' : '0'
         }}>
           <QuiltGrid
             squares={squares}
             onSquareClick={(index) => setEditingSquare(index)}
             onPatternCopy={copySquarePattern}
+            isPreviewMode={isPreviewMode}
+            poweredUpSquares={poweredUpSquares}
           />
         </div>
 
@@ -125,6 +216,62 @@ function App() {
             }}
             onClose={() => setEditingSquare(null)}
           />
+        )}
+
+        {showChatModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000
+            }}
+            onClick={() => setShowChatModal(false)}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: '40px',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                maxWidth: '500px',
+                width: '90%',
+                textAlign: 'center'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#1f2937',
+                marginBottom: '20px'
+              }}>
+                It&apos;s Meg&apos;s birthday
+              </h2>
+              <button
+                onClick={() => setShowChatModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

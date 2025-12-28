@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+* {
+  font-family: 'Inter', sans-serif;
+}
+
 @layer utilities {
   .grid-cols-16 {
     grid-template-columns: repeat(16, minmax(0, 1fr));

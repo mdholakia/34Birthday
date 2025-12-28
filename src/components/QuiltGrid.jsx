@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import QuiltSquare from './QuiltSquare'
 
-function QuiltGrid({ squares, onSquareClick, onPatternCopy }) {
+function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = false, poweredUpSquares = new Set() }) {
   const [dragState, setDragState] = useState({
     isDragging: false,
     sourceIndex: null,
@@ -66,22 +66,17 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy }) {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(6, 1fr)',
-          width: '200%', // Mobile: 3 columns fit in viewport (6/3 = 200%)
+          width: '100%',
           position: 'relative',
-          touchAction: dragState.isDragging ? 'none' : 'auto'
+          touchAction: dragState.isDragging ? 'none' : 'auto',
+          transition: 'width 0.3s ease, border 0.3s ease',
+          border: isPreviewMode ? '1px solid #d1d5db' : 'none'
         }}
         onMouseMove={(e) => handleDragMove({ x: e.clientX, y: e.clientY })}
         onMouseUp={handleDragEnd}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleDragEnd}
       >
-        <style>{`
-          @media (min-width: 768px) {
-            .quilt-grid {
-              width: 120% !important; /* Desktop: ~5 columns fit in viewport (6/5 = 120%) */
-            }
-          }
-        `}</style>
         {squares.map((pixels, index) => (
           <QuiltSquare
             key={index}
@@ -92,6 +87,8 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy }) {
             onMouseEnter={() => handleSquareHover(index)}
             isSource={dragState.isDragging && dragState.sourceIndex === index}
             isHovered={dragState.isDragging && dragState.hoveredIndex === index}
+            isPreviewMode={isPreviewMode}
+            isPoweredUp={poweredUpSquares.has(index)}
           />
         ))}
       </div>

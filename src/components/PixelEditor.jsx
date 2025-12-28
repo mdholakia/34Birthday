@@ -1,47 +1,17 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 
 const COLORS = [
-  // Row 1 - Pinks
-  { value: '#F2D9E5' },
-  { value: '#DCA3B9' },
-  { value: '#D2437A' },
-  { value: '#F9F8F4' },
+  // Row 1 (top row in Frame 14, left to right)
+  { value: '#758859' }, // olive green
+  { value: '#E0C877' }, // yellow
+  { value: '#EA6847' }, // orange
+  { value: '#89B9DA' }, // light blue
 
-  // Row 2 - Peach/Orange/Beige
-  { value: '#FFD4C1' },
-  { value: '#FFB88C' },
-  { value: '#FF7D3D' },
-  { value: '#D4C5A8' },
-
-  // Row 3 - Yellow/Gold
-  { value: '#F5E9B8' },
-  { value: '#E4C259' },
-  { value: '#C4A524' },
-  { value: '#8B7518' },
-
-  // Row 4 - Green
-  { value: '#C8E6D0' },
-  { value: '#86915D' },
-  { value: '#40654A' },
-  { value: '#2A4435' },
-
-  // Row 5 - Blue
-  { value: '#D4E8F5' },
-  { value: '#7EB5D9' },
-  { value: '#4A8AB8' },
-  { value: '#224653' },
-
-  // Row 6 - Purple/Gray
-  { value: '#E8D9F5' },
-  { value: '#B599D9' },
-  { value: '#7D5BA8' },
-  { value: '#D5DCDF' },
-
-  // Row 7 - Black/Gray/White
-  { value: '#000000' },
-  { value: '#8B9199' },
-  { value: '#4A5058' },
-  { value: '#FFFFFF' },
+  // Row 2 (bottom row in Frame 14, left to right)
+  { value: '#C7CBA3' }, // sage
+  { value: 'rgb(237, 232, 231)' }, // white/beige
+  { value: '#E99AA7' }, // pink
+  { value: '#484D88' }, // dark blue
 ]
 
 const GRID_SIZE = 16
@@ -52,7 +22,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
     pixels.map(row => [...row])
   )
   const [isDrawing, setIsDrawing] = useState(false)
-  const [selectedColor, setSelectedColor] = useState('#000000')
+  const [selectedColor, setSelectedColor] = useState('#758859')
   const [isMobile, setIsMobile] = useState(false)
   const [toolMode, setToolMode] = useState('draw') // 'draw' or 'bucket'
   const [hoverPixel, setHoverPixel] = useState(null)
@@ -380,12 +350,12 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handleClear = () => {
     saveToLocalHistory()
-    setEditedPixels(Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#FFFFFF')))
+    setEditedPixels(Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE')))
   }
 
   const handleRotateClockwise = () => {
     saveToLocalHistory()
-    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#FFFFFF'))
+    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE'))
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
         newPixels[col][GRID_SIZE - 1 - row] = editedPixels[row][col]
@@ -396,7 +366,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handleRotateCounterClockwise = () => {
     saveToLocalHistory()
-    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#FFFFFF'))
+    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE'))
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
         newPixels[GRID_SIZE - 1 - col][row] = editedPixels[row][col]
@@ -414,140 +384,97 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F5EFEE',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 50
       }}>
-        {/* Top Toolbar */}
+        {/* Top Section - Dark background */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          borderBottom: '1px solid #ddd',
-          backgroundColor: 'white',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
+          backgroundColor: '#121212',
+          padding: '16px',
+          paddingBottom: '20px'
         }}>
-          {/* Buttons on left */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          {/* Draw/Fill Toggle */}
+          <div style={{
+            display: 'flex',
+            gap: '0',
+            marginBottom: '16px',
+            maxWidth: '400px',
+            margin: '0 auto 16px auto'
+          }}>
             <button
-              onClick={() => onSave(editedPixels)}
+              onClick={() => setToolMode('draw')}
               style={{
-                padding: '8px 12px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
+                flex: 1,
+                minHeight: '48px',
+                padding: '12px',
+                borderRadius: '8px 0 0 8px',
                 border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              Save
-            </button>
-            <button
-              onClick={onClose}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#d1d5db',
-                color: '#333',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleRotateCounterClockwise}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#8b5cf6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-              title="Rotate Counter-Clockwise"
-            >
-              ↺
-            </button>
-            <button
-              onClick={handleRotateClockwise}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#8b5cf6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-              title="Rotate Clockwise"
-            >
-              ↻
-            </button>
-            <button
-              onClick={handleClear}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              Clear
-            </button>
-          </div>
-
-          {/* Paint bucket and colors on right */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {/* Paint bucket tool */}
-            <button
-              onClick={() => setToolMode(toolMode === 'bucket' ? 'draw' : 'bucket')}
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '6px',
-                backgroundColor: toolMode === 'bucket' ? '#3b82f6' : 'white',
-                border: '2px solid ' + (toolMode === 'bucket' ? '#3b82f6' : '#ddd'),
                 cursor: 'pointer',
-                padding: 0,
+                backgroundColor: toolMode === 'draw' ? '#a5b4fc' : 'white',
+                color: toolMode === 'draw' ? 'white' : '#333',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '18px'
+                gap: '6px'
               }}
-              aria-label="Paint Bucket Tool"
-              title="Paint Bucket (Flood Fill)"
             >
-              🪣
+              <span>✏️</span>
+              <span>Draw</span>
             </button>
+            <button
+              onClick={() => setToolMode('bucket')}
+              style={{
+                flex: 1,
+                minHeight: '48px',
+                padding: '12px',
+                borderRadius: '0 8px 8px 0',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: toolMode === 'bucket' ? '#a5b4fc' : 'white',
+                color: toolMode === 'bucket' ? 'white' : '#333',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>🪣</span>
+              <span>Fill</span>
+            </button>
+          </div>
+
+          {/* Color palette in 2x4 grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateRows: 'repeat(2, 1fr)',
+            gap: '12px',
+            maxWidth: '400px',
+            margin: '0 auto'
+          }}>
             {COLORS.map((color) => (
               <button
                 key={color.value}
                 onClick={() => setSelectedColor(color.value)}
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
+                  width: '100%',
+                  aspectRatio: '1',
+                  minHeight: '60px',
+                  borderRadius: '8px',
                   backgroundColor: color.value,
-                  border: selectedColor === color.value ? '3px solid #333' : '2px solid #ddd',
+                  border: selectedColor === color.value ? '4px solid white' : '2px solid rgba(255,255,255,0.3)',
                   cursor: 'pointer',
                   padding: 0,
-                  flexShrink: 0
+                  transition: 'all 0.2s',
+                  boxShadow: selectedColor === color.value ? '0 0 0 2px #121212, 0 0 0 6px white' : 'none'
                 }}
                 aria-label={color.value}
               />
@@ -555,22 +482,21 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
           </div>
         </div>
 
-        {/* Canvas - tap outside to close */}
+        {/* Canvas - centered */}
         <div
           style={{
             flex: 1,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px'
-          }}
-          onClick={(e) => {
-            // Close if clicking the background
-            if (e.target === e.currentTarget) {
-              onClose()
-            }
+            padding: '20px',
+            overflow: 'hidden',
+            gap: '16px',
+            minHeight: 0
           }}
         >
+          {/* Canvas container */}
           <div
             style={{
               touchAction: 'none',
@@ -588,7 +514,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               gridTemplateColumns: `repeat(${TOTAL_SIZE}, 1fr)`,
               gridTemplateRows: `repeat(${TOTAL_SIZE}, 1fr)`,
               gap: '0',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: '#F5EFEE',
               width: '90vw',
               height: '90vw',
               maxWidth: '600px',
@@ -603,12 +529,11 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                     <div
                       key={`${rowIndex}-${colIndex}`}
                       style={{
-                        backgroundColor: cell.isHalo
-                          ? cell.color
-                          : cell.color,
+                        backgroundColor: cell.color,
                         border: cell.isHalo ? 'none' : '1px solid #e5e5e5',
                         cursor: cell.isHalo ? 'default' : (toolMode === 'bucket' ? 'crosshair' : 'pointer'),
-                        position: 'relative'
+                        position: 'relative',
+                        opacity: cell.isHalo ? 0.3 : 1
                       }}
                       onMouseDown={() => !cell.isHalo && handlePixelClick(cell.row, cell.col)}
                       onMouseEnter={() => !cell.isHalo && handlePixelEnter(cell.row, cell.col)}
@@ -644,43 +569,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                   )
                 })
               )}
-              {/* Gradient overlays for halo */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: `${(HALO_SIZE / TOTAL_SIZE) * 100}%`,
-                background: 'linear-gradient(to bottom, rgba(255,255,255,0.8) 10%, rgba(255,255,255,0.4) 100%)',
-                pointerEvents: 'none'
-              }} />
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                height: `${(HALO_SIZE / TOTAL_SIZE) * 100}%`,
-                background: 'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%)',
-                pointerEvents: 'none'
-              }} />
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: `${(HALO_SIZE / TOTAL_SIZE) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(to right, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%)',
-                pointerEvents: 'none'
-              }} />
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: `${(HALO_SIZE / TOTAL_SIZE) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(to left, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%)',
-                pointerEvents: 'none'
-              }} />
               {/* Border overlay */}
               <div style={{
                 position: 'absolute',
@@ -709,6 +597,126 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 }} />
               )}
             </div>
+          </div>
+
+          {/* Control buttons below canvas */}
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'center',
+            marginBottom: '32px'
+          }}>
+            <button
+              onClick={handleClear}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                cursor: 'pointer',
+                // backgroundColor: 'white',
+                color: '#333',
+                fontSize: '13px',
+                fontWeight: '500',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}
+            >
+              Clear Canvas
+            </button>
+            <button
+              onClick={handleRotateCounterClockwise}
+              style={{
+                minWidth: '36px',
+                minHeight: '36px',
+                padding: '6px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                cursor: 'pointer',
+                // backgroundColor: 'white',
+                color: '#333',
+                fontSize: '18px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}
+              title="Rotate Counter-Clockwise"
+            >
+              ↺
+            </button>
+            <button
+              onClick={handleRotateClockwise}
+              style={{
+                minWidth: '36px',
+                minHeight: '36px',
+                padding: '6px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                cursor: 'pointer',
+                // backgroundColor: 'white',
+                color: '#333',
+                fontSize: '18px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}
+              title="Rotate Clockwise"
+            >
+              ↻
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Section - Dark background */}
+        <div style={{
+          backgroundColor: '#121212',
+          padding: '20px 16px',
+          paddingBottom: '24px'
+        }}>
+          {/* Save/Cancel buttons */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            maxWidth: '400px',
+            margin: '0 auto'
+          }}>
+            <button
+              onClick={() => onSave(editedPixels)}
+              style={{
+                width: '100%',
+                minHeight: '52px',
+                padding: '14px',
+                backgroundColor: 'white',
+                color: '#121212',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '17px',
+                fontWeight: '600'
+              }}
+            >
+              Save changes
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                width: '100%',
+                minHeight: '52px',
+                padding: '14px',
+                backgroundColor: 'transparent',
+                color: '#999',
+                border: '2px solid rgba(255,255,255,0.2)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '17px',
+                fontWeight: '500'
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -756,7 +764,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             gridTemplateColumns: `repeat(${TOTAL_SIZE}, 1fr)`,
             gridTemplateRows: `repeat(${TOTAL_SIZE}, 1fr)`,
             gap: '0',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: '#F5EFEE',
             width: 'min(100%, 100vh - 80px)',
             aspectRatio: '1',
             position: 'relative'
@@ -768,12 +776,11 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                   <div
                     key={`${rowIndex}-${colIndex}`}
                     style={{
-                      backgroundColor: cell.isHalo
-                        ? cell.color
-                        : cell.color,
+                      backgroundColor: cell.color,
                       border: cell.isHalo ? 'none' : '1px solid #e5e5e5',
                       cursor: cell.isHalo ? 'default' : (toolMode === 'bucket' ? 'crosshair' : 'pointer'),
-                      position: 'relative'
+                      position: 'relative',
+                      opacity: cell.isHalo ? 0.3 : 1
                     }}
                     onMouseDown={() => !cell.isHalo && handlePixelClick(cell.row, cell.col)}
                     onMouseEnter={() => !cell.isHalo && handlePixelEnter(cell.row, cell.col)}
@@ -920,18 +927,18 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '6px',
+            gap: '8px',
             marginBottom: '24px',
-            maxWidth: '220px'
+            maxWidth: '200px'
           }}>
             {COLORS.map((color) => (
               <button
                 key={color.value}
                 onClick={() => setSelectedColor(color.value)}
                 style={{
-                  width: '100%',
-                  aspectRatio: '1',
-                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
                   border: selectedColor === color.value ? '3px solid #333' : '2px solid #ddd',
                   cursor: 'pointer',
                   backgroundColor: color.value,
@@ -1033,7 +1040,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             style={{
               width: '100%',
               padding: '16px',
-              backgroundColor: 'white',
+              // backgroundColor: 'grey',
               color: '#333',
               border: '2px solid #ddd',
               borderRadius: '8px',
