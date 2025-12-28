@@ -17,6 +17,30 @@ function App() {
   const [showChatModal, setShowChatModal] = useState(false)
   const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
 
+  // Freeze viewport height on mount to prevent mobile browser recalculations
+  useEffect(() => {
+    const setAppHeight = () => {
+      const vh = window.innerHeight
+      document.documentElement.style.setProperty('--app-height', `${vh}px`)
+    }
+
+    // Set immediately
+    setAppHeight()
+
+    // Only recalculate on actual window resize (orientation change), not during interactions
+    let resizeTimeout
+    const handleResize = () => {
+      clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(setAppHeight, 150)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      clearTimeout(resizeTimeout)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
   const saveToHistory = () => {
     setHistory(prev => [...prev, JSON.parse(JSON.stringify(squares))])
   }
@@ -173,7 +197,7 @@ function App() {
           overflow: isPreviewMode ? 'visible' : 'auto',
           width: '100%',
           height: isPreviewMode ? 'auto' : 'auto',
-          maxHeight: isPreviewMode ? 'none' : 'calc(100svh - 150px)',
+          maxHeight: isPreviewMode ? 'none' : 'calc(var(--app-height, 100vh) - 150px)',
           display: isPreviewMode ? 'flex' : 'block',
           alignItems: isPreviewMode ? 'center' : 'stretch',
           justifyContent: isPreviewMode ? 'center' : 'flex-start',

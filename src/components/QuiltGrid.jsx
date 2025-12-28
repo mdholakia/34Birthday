@@ -21,6 +21,27 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Prevent any scrolling/address bar changes during drag
+  useEffect(() => {
+    if (!dragState.isDragging) return
+
+    const preventScrolling = (e) => {
+      // Prevent any scroll behavior that might trigger address bar
+      if (e.cancelable) {
+        e.preventDefault()
+      }
+    }
+
+    // Add listeners with passive: false to allow preventDefault
+    document.addEventListener('touchmove', preventScrolling, { passive: false })
+    document.addEventListener('scroll', preventScrolling, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchmove', preventScrolling)
+      document.removeEventListener('scroll', preventScrolling)
+    }
+  }, [dragState.isDragging])
+
   const handleDragStart = (index, pos) => {
     // Lock container dimensions to prevent reflow
     if (containerRef.current && !lockedDimensions.current) {
@@ -104,6 +125,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(6, 1fr)',
+          gridAutoRows: '1fr',
           width: '100%',
           position: 'relative',
           touchAction: isPreviewMode ? 'auto' : 'none',
