@@ -23,12 +23,12 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   )
   const [isDrawing, setIsDrawing] = useState(false)
   const [selectedColor, setSelectedColor] = useState('#758859')
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
   const [toolMode, setToolMode] = useState('draw') // 'draw' or 'bucket'
   const [fillPreview, setFillPreview] = useState(new Set())
   const [justFilled, setJustFilled] = useState(false)
   const [localHistory, setLocalHistory] = useState([])
-  const [isShortViewport, setIsShortViewport] = useState(false)
+  const [isShortViewport, setIsShortViewport] = useState(() => typeof window !== 'undefined' && window.innerHeight < 700)
 
   // Drawing session tracking for debounced undo
   const drawingSessionStartRef = useRef(null)

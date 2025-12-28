@@ -99,12 +99,27 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         borderTop: isPreviewMode ? 'none' : '1px solid #eee',
         cursor: 'pointer',
         position: 'relative',
-        boxShadow: isPreviewMode ? 'none' : (isSource ? 'inset 0 0 0 3px #3b82f6, 0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),
+        boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),
         transition: 'box-shadow 0.15s ease',
         boxSizing: 'border-box'
       }}
     >
       <>
+        {/* Source border overlay */}
+        {isSource && !isPreviewMode && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            border: '3px solid #3b82f6',
+            pointerEvents: 'none',
+            zIndex: 2,
+            boxSizing: 'border-box'
+          }} />
+        )}
+
         {/* Hover scrim overlay */}
         {isHovered && !isPreviewMode && (
           <div style={{
