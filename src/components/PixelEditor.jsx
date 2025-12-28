@@ -25,7 +25,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const [selectedColor, setSelectedColor] = useState('#758859')
   const [isMobile, setIsMobile] = useState(false)
   const [toolMode, setToolMode] = useState('draw') // 'draw' or 'bucket'
-  const [hoverPixel, setHoverPixel] = useState(null)
   const [fillPreview, setFillPreview] = useState(new Set())
   const [justFilled, setJustFilled] = useState(false)
   const [localHistory, setLocalHistory] = useState([])
@@ -337,7 +336,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handlePixelEnter = (row, col) => {
     if (toolMode === 'bucket') {
-      setHoverPixel({ row, col })
       const targetColor = editedPixels[row][col]
       const affectedPixels = getFloodFillPixels(row, col, targetColor)
       setFillPreview(affectedPixels)
@@ -352,7 +350,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handlePixelLeave = () => {
     if (toolMode === 'bucket') {
-      setHoverPixel(null)
       setFillPreview(new Set())
     }
   }
@@ -514,8 +511,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             justifyContent: 'center',
             padding: '12px',
             overflow: 'hidden',
-            gap: '10px',
-            minHeight: 0
+            minHeight: 0,
+            position: 'relative'
           }}
         >
           {/* Canvas container */}
@@ -523,7 +520,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             style={{
               touchAction: 'none',
               maxWidth: '100%',
-              maxHeight: '100%'
+              maxHeight: '100%',
+              position: 'relative'
             }}
             onMouseDown={() => setIsDrawing(true)}
             onMouseUp={() => setIsDrawing(false)}
@@ -619,27 +617,32 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 }} />
               )}
             </div>
-          </div>
 
-          {/* Control buttons below canvas */}
-          <div style={{
-            display: 'flex',
-            gap: '6px',
-            justifyContent: 'center',
-            marginBottom: '8px'
-          }}>
+            {/* Control buttons - overlaid on bottom halo */}
+            <div style={{
+              position: 'absolute',
+              top: `${((HALO_SIZE + GRID_SIZE) / TOTAL_SIZE) * 100}%`,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              gap: '6px',
+              justifyContent: 'center',
+              zIndex: 10,
+              marginTop: '24px'
+            }}>
             <button
               onClick={handleClear}
               style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
+                padding: isShortViewport ? '4px 8px' : '6px 12px',
+                borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
-                // backgroundColor: 'white',
+                backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: '12px',
+                fontSize: isShortViewport ? '10px' : '12px',
                 fontWeight: '500',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(4px)'
               }}
             >
               Clear Canvas
@@ -647,20 +650,21 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleRotateCounterClockwise}
               style={{
-                minWidth: '32px',
-                minHeight: '32px',
-                padding: '4px',
-                borderRadius: '6px',
+                minWidth: isShortViewport ? '24px' : '32px',
+                minHeight: isShortViewport ? '24px' : '32px',
+                padding: '2px',
+                borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
-                // backgroundColor: 'white',
+                backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: '16px',
+                fontSize: isShortViewport ? '14px' : '16px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(4px)'
               }}
               title="Rotate Counter-Clockwise"
             >
@@ -669,25 +673,27 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleRotateClockwise}
               style={{
-                minWidth: '32px',
-                minHeight: '32px',
-                padding: '4px',
-                borderRadius: '6px',
+                minWidth: isShortViewport ? '24px' : '32px',
+                minHeight: isShortViewport ? '24px' : '32px',
+                padding: '2px',
+                borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
-                // backgroundColor: 'white',
+                backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: '16px',
+                fontSize: isShortViewport ? '14px' : '16px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(4px)'
               }}
               title="Rotate Clockwise"
             >
               ↻
             </button>
+            </div>
           </div>
         </div>
 
