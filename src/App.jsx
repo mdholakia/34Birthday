@@ -121,7 +121,7 @@ function App() {
         <div style={{
           display: 'flex',
           color: 'white',
-          backgroundColor: '#121212',
+          backgroundColor: '#c4a1a1ff',
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '2px solid #e5e7eb',

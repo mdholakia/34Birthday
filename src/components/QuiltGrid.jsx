@@ -11,7 +11,6 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
 
   const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef(null)
-  const lockedDimensions = useRef(null)
 
   // Detect mobile
   useEffect(() => {
@@ -43,13 +42,6 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   }, [dragState.isDragging])
 
   const handleDragStart = (index, pos) => {
-    // Lock container width only (let grid calculate height)
-    if (containerRef.current && !lockedDimensions.current) {
-      const rect = containerRef.current.getBoundingClientRect()
-      lockedDimensions.current = { width: rect.width }
-      containerRef.current.style.width = `${rect.width}px`
-    }
-
     // Haptic feedback on mobile
     if (navigator.vibrate) {
       navigator.vibrate(50)
@@ -77,12 +69,6 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         navigator.vibrate([30, 50, 30])
       }
       onPatternCopy(dragState.sourceIndex, dragState.hoveredIndex)
-    }
-
-    // Unlock container width
-    if (containerRef.current && lockedDimensions.current) {
-      containerRef.current.style.width = ''
-      lockedDimensions.current = null
     }
 
     setDragState({
