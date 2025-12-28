@@ -384,17 +384,40 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   // Mobile layout
   if (isMobile) {
     return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#F5EFEE',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 50
-      }}>
+      <>
+        <style>{`
+          @keyframes editorSlideUp {
+            from {
+              transform: translateY(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
+              opacity: 1;
+            }
+          }
+
+          @keyframes editorFadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+        `}</style>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#F5EFEE',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 50,
+          animation: 'editorSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}>
         {/* Top Section - Dark background */}
         <div style={{
           backgroundColor: '#121212',
@@ -751,21 +774,45 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
           </div>
         </div>
       </div>
+      </>
     )
   }
 
   // Desktop layout
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: '#FFFFFF',
-      display: 'flex',
-      zIndex: 50
-    }}>
+    <>
+      <style>{`
+        @keyframes editorSlideUp {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes editorFadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#FFFFFF',
+        display: 'flex',
+        zIndex: 50,
+        animation: 'editorFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}>
       {/* Left side - 60% - Pixel Grid */}
       <div style={{
         width: '60%',
@@ -1085,6 +1132,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

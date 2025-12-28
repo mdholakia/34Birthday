@@ -97,12 +97,10 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         backgroundColor: 'white',
         borderLeft: isPreviewMode ? 'none' : '1px solid #eee',
         borderTop: isPreviewMode ? 'none' : '1px solid #eee',
-        outline: isPreviewMode ? 'none' : (isSource ? '3px solid #3b82f6' : 'none'),
-        outlineOffset: isPreviewMode ? '0' : (isSource ? '-3px' : '0'),
         cursor: 'pointer',
         position: 'relative',
-        boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),
-        transition: 'outline 0.15s ease, box-shadow 0.15s ease',
+        boxShadow: isPreviewMode ? 'none' : (isSource ? 'inset 0 0 0 3px #3b82f6, 0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),
+        transition: 'box-shadow 0.15s ease',
         boxSizing: 'border-box'
       }}
     >
