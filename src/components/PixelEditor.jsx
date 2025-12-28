@@ -29,6 +29,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const [fillPreview, setFillPreview] = useState(new Set())
   const [justFilled, setJustFilled] = useState(false)
   const [localHistory, setLocalHistory] = useState([])
+  const [isShortViewport, setIsShortViewport] = useState(false)
 
   // Drawing session tracking for debounced undo
   const drawingSessionStartRef = useRef(null)
@@ -40,6 +41,14 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Detect viewport height
+  useEffect(() => {
+    const checkViewportHeight = () => setIsShortViewport(window.innerHeight < 700)
+    checkViewportHeight()
+    window.addEventListener('resize', checkViewportHeight)
+    return () => window.removeEventListener('resize', checkViewportHeight)
   }, [])
 
   // Cleanup debounce timeout on unmount
@@ -392,35 +401,35 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
         {/* Top Section - Dark background */}
         <div style={{
           backgroundColor: '#121212',
-          padding: '16px',
-          paddingBottom: '20px'
+          padding: '10px',
+          paddingBottom: '12px'
         }}>
           {/* Draw/Fill Toggle */}
           <div style={{
             display: 'flex',
             gap: '0',
-            marginBottom: '16px',
+            marginBottom: '10px',
             maxWidth: '400px',
-            margin: '0 auto 16px auto'
+            margin: '0 auto 10px auto'
           }}>
             <button
               onClick={() => setToolMode('draw')}
               style={{
                 flex: 1,
-                minHeight: '48px',
-                padding: '12px',
-                borderRadius: '8px 0 0 8px',
+                minHeight: '36px',
+                padding: '8px',
+                borderRadius: '6px 0 0 6px',
                 border: 'none',
                 cursor: 'pointer',
                 backgroundColor: toolMode === 'draw' ? '#a5b4fc' : 'white',
                 color: toolMode === 'draw' ? 'white' : '#333',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: '500',
                 transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px'
+                gap: '4px'
               }}
             >
               <span>✏️</span>
@@ -430,20 +439,20 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               onClick={() => setToolMode('bucket')}
               style={{
                 flex: 1,
-                minHeight: '48px',
-                padding: '12px',
-                borderRadius: '0 8px 8px 0',
+                minHeight: '36px',
+                padding: '8px',
+                borderRadius: '0 6px 6px 0',
                 border: 'none',
                 cursor: 'pointer',
                 backgroundColor: toolMode === 'bucket' ? '#a5b4fc' : 'white',
                 color: toolMode === 'bucket' ? 'white' : '#333',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: '500',
                 transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px'
+                gap: '4px'
               }}
             >
               <span>🪣</span>
@@ -456,8 +465,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gridTemplateRows: 'repeat(2, 1fr)',
-            gap: '12px',
-            maxWidth: '400px',
+            gap: isShortViewport ? '6px' : '8px',
+            maxWidth: isShortViewport ? 'none' : '400px',
             margin: '0 auto'
           }}>
             {COLORS.map((color) => (
@@ -467,14 +476,15 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 style={{
                   width: '100%',
                   aspectRatio: '1',
-                  minHeight: '60px',
-                  borderRadius: '8px',
+                  minHeight: isShortViewport ? '36px' : '44px',
+                  maxHeight: isShortViewport ? '44px' : 'none',
+                  borderRadius: isShortViewport ? '3px' : '6px',
                   backgroundColor: color.value,
-                  border: selectedColor === color.value ? '4px solid white' : '2px solid rgba(255,255,255,0.3)',
+                  border: selectedColor === color.value ? '3px solid white' : '2px solid rgba(255,255,255,0.3)',
                   cursor: 'pointer',
                   padding: 0,
                   transition: 'all 0.2s',
-                  boxShadow: selectedColor === color.value ? '0 0 0 2px #121212, 0 0 0 6px white' : 'none'
+                  boxShadow: selectedColor === color.value ? '0 0 0 2px #121212, 0 0 0 5px white' : 'none'
                 }}
                 aria-label={color.value}
               />
@@ -490,9 +500,9 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
+            padding: '12px',
             overflow: 'hidden',
-            gap: '16px',
+            gap: '10px',
             minHeight: 0
           }}
         >
@@ -602,20 +612,20 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
           {/* Control buttons below canvas */}
           <div style={{
             display: 'flex',
-            gap: '8px',
+            gap: '6px',
             justifyContent: 'center',
-            marginBottom: '32px'
+            marginBottom: '8px'
           }}>
             <button
               onClick={handleClear}
               style={{
-                padding: '8px 16px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 // backgroundColor: 'white',
                 color: '#333',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: '500',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
               }}
@@ -625,15 +635,15 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleRotateCounterClockwise}
               style={{
-                minWidth: '36px',
-                minHeight: '36px',
-                padding: '6px',
+                minWidth: '32px',
+                minHeight: '32px',
+                padding: '4px',
                 borderRadius: '6px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 // backgroundColor: 'white',
                 color: '#333',
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
@@ -647,15 +657,15 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleRotateClockwise}
               style={{
-                minWidth: '36px',
-                minHeight: '36px',
-                padding: '6px',
+                minWidth: '32px',
+                minHeight: '32px',
+                padding: '4px',
                 borderRadius: '6px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 // backgroundColor: 'white',
                 color: '#333',
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
@@ -672,50 +682,52 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
         {/* Bottom Section - Dark background */}
         <div style={{
           backgroundColor: '#121212',
-          padding: '20px 16px',
-          paddingBottom: '24px'
+          padding: '12px',
+          paddingBottom: '16px'
         }}>
           {/* Save/Cancel buttons */}
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
+            flexDirection: isShortViewport ? 'row' : 'column',
+            gap: '8px',
             maxWidth: '400px',
             margin: '0 auto'
           }}>
             <button
-              onClick={() => onSave(editedPixels)}
-              style={{
-                width: '100%',
-                minHeight: '52px',
-                padding: '14px',
-                backgroundColor: 'white',
-                color: '#121212',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '17px',
-                fontWeight: '600'
-              }}
-            >
-              Save changes
-            </button>
-            <button
               onClick={onClose}
               style={{
                 width: '100%',
-                minHeight: '52px',
-                padding: '14px',
+                minHeight: '42px',
+                padding: '10px',
                 backgroundColor: 'transparent',
                 color: '#999',
                 border: '2px solid rgba(255,255,255,0.2)',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '17px',
-                fontWeight: '500'
+                fontSize: '15px',
+                fontWeight: '500',
+                order: isShortViewport ? 1 : 2
               }}
             >
               Cancel
+            </button>
+            <button
+              onClick={() => onSave(editedPixels)}
+              style={{
+                width: '100%',
+                minHeight: '42px',
+                padding: '10px',
+                backgroundColor: '#f5f5f5',
+                color: '#121212',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '15px',
+                fontWeight: '600',
+                order: isShortViewport ? 2 : 1
+              }}
+            >
+              Save changes
             </button>
           </div>
         </div>
