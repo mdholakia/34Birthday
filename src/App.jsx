@@ -173,7 +173,7 @@ function App() {
           overflow: isPreviewMode ? 'visible' : 'auto',
           width: '100%',
           height: isPreviewMode ? 'auto' : 'auto',
-          maxHeight: isPreviewMode ? 'none' : 'calc(100dvh - 150px)',
+          maxHeight: isPreviewMode ? 'none' : 'calc(100svh - 150px)',
           display: isPreviewMode ? 'flex' : 'block',
           alignItems: isPreviewMode ? 'center' : 'stretch',
           justifyContent: isPreviewMode ? 'center' : 'flex-start',

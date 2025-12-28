@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import QuiltSquare from './QuiltSquare'
 
 function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = false, poweredUpSquares = new Set() }) {
@@ -10,6 +10,8 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   })
 
   const [isMobile, setIsMobile] = useState(false)
+  const containerRef = useRef(null)
+  const lockedDimensions = useRef(null)
 
   // Detect mobile
   useEffect(() => {
@@ -20,6 +22,14 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   }, [])
 
   const handleDragStart = (index, pos) => {
+    // Lock container dimensions to prevent reflow
+    if (containerRef.current && !lockedDimensions.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      lockedDimensions.current = { width: rect.width, height: rect.height }
+      containerRef.current.style.width = `${rect.width}px`
+      containerRef.current.style.height = `${rect.height}px`
+    }
+
     // Haptic feedback on mobile
     if (navigator.vibrate) {
       navigator.vibrate(50)
@@ -48,6 +58,14 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
       }
       onPatternCopy(dragState.sourceIndex, dragState.hoveredIndex)
     }
+
+    // Unlock container dimensions
+    if (containerRef.current && lockedDimensions.current) {
+      containerRef.current.style.width = ''
+      containerRef.current.style.height = ''
+      lockedDimensions.current = null
+    }
+
     setDragState({
       isDragging: false,
       sourceIndex: null,
@@ -81,6 +99,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   return (
     <>
       <div
+        ref={containerRef}
         className="quilt-grid"
         style={{
           display: 'grid',
@@ -88,6 +107,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
           width: '100%',
           position: 'relative',
           touchAction: isPreviewMode ? 'auto' : 'none',
+          contain: 'layout paint',
           transition: 'width 0.3s ease, border 0.3s ease',
           border: isPreviewMode ? '1px solid #d1d5db' : 'none',
           WebkitUserSelect: 'none',
@@ -120,19 +140,20 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
       {dragState.isDragging && dragState.currentPos && (
         <div style={{
           position: 'fixed',
-          left: dragState.currentPos.x,
-          top: dragState.currentPos.y,
+          top: 0,
+          left: 0,
+          transform: `translate3d(${dragState.currentPos.x}px, ${dragState.currentPos.y}px, 0) translate(-50%, -50%)`,
           width: isMobile ? '120px' : '80px',
           height: isMobile ? '120px' : '80px',
           pointerEvents: 'none',
           zIndex: 1000,
           opacity: 0.85,
-          transform: 'translate(-50%, -50%)',
           border: '3px solid #3b82f6',
           borderRadius: isMobile ? '8px' : '4px',
           backgroundColor: 'white',
           boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
-          transition: 'transform 0.1s ease'
+          willChange: 'transform',
+          contain: 'layout size paint'
         }}>
           <div style={{
             width: '100%',
