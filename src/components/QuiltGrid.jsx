@@ -43,12 +43,11 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   }, [dragState.isDragging])
 
   const handleDragStart = (index, pos) => {
-    // Lock container dimensions to prevent reflow
+    // Lock container width only (let grid calculate height)
     if (containerRef.current && !lockedDimensions.current) {
       const rect = containerRef.current.getBoundingClientRect()
-      lockedDimensions.current = { width: rect.width, height: rect.height }
+      lockedDimensions.current = { width: rect.width }
       containerRef.current.style.width = `${rect.width}px`
-      containerRef.current.style.height = `${rect.height}px`
     }
 
     // Haptic feedback on mobile
@@ -80,10 +79,9 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
       onPatternCopy(dragState.sourceIndex, dragState.hoveredIndex)
     }
 
-    // Unlock container dimensions
+    // Unlock container width
     if (containerRef.current && lockedDimensions.current) {
       containerRef.current.style.width = ''
-      containerRef.current.style.height = ''
       lockedDimensions.current = null
     }
 
