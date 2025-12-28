@@ -1,8 +1,10 @@
-function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false }) {
+function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false, isMobile = false }) {
   const checkLowerLeftCorner = (clientX, clientY, rect) => {
     const x = clientX - rect.left
     const y = clientY - rect.top
-    return (x < rect.width * 0.2) && (y > rect.height * 0.8)
+    // Much larger touch target on mobile (50% vs 20%)
+    const threshold = isMobile ? 0.5 : 0.2
+    return (x < rect.width * threshold) && (y > rect.height * (1 - threshold))
   }
 
   const handleMouseDown = (e) => {
@@ -48,12 +50,13 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         width: '100%',
         aspectRatio: '1',
         backgroundColor: 'white',
-        borderLeft: isPreviewMode ? 'none' : (isSource ? '3px solid #3b82f6' : isHovered ? '3px solid #10b981' : '1px solid #eee'),
-        borderTop: isPreviewMode ? 'none' : (isSource ? '3px solid #3b82f6' : isHovered ? '3px solid #10b981' : '1px solid #eee'),
+        borderLeft: isPreviewMode ? 'none' : (isSource ? '3px solid #3b82f6' : isHovered ? '4px solid #10b981' : '1px solid #eee'),
+        borderTop: isPreviewMode ? 'none' : (isSource ? '3px solid #3b82f6' : isHovered ? '4px solid #10b981' : '1px solid #eee'),
         cursor: 'pointer',
         position: 'relative',
-        boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : isHovered ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none'),
-        transition: 'border 0.3s ease, box-shadow 0.3s ease'
+        boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : isHovered ? '0 0 20px rgba(16, 185, 129, 0.6)' : 'none'),
+        transition: 'border 0.15s ease, box-shadow 0.15s ease',
+        transform: isHovered ? 'scale(0.98)' : 'scale(1)'
       }}
     >
       <div style={{
@@ -138,11 +141,12 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
               position: 'absolute',
               bottom: '0',
               left: '0',
-              width: '20%',
-              height: '20%',
-              borderLeft: '2px solid rgba(59, 130, 246, 0.3)',
-              borderBottom: '2px solid rgba(59, 130, 246, 0.3)',
-              pointerEvents: 'none'
+              width: isMobile ? '50%' : '20%',
+              height: isMobile ? '50%' : '20%',
+              borderLeft: isMobile ? '3px solid rgba(59, 130, 246, 0.5)' : '2px solid rgba(59, 130, 246, 0.3)',
+              borderBottom: isMobile ? '3px solid rgba(59, 130, 246, 0.5)' : '2px solid rgba(59, 130, 246, 0.3)',
+              pointerEvents: 'none',
+              background: isMobile ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 50%)' : 'none'
             }} />
           )}
 
@@ -152,8 +156,8 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
               position: 'absolute',
               bottom: '0',
               left: '0',
-              width: '30%',
-              height: '30%',
+              width: isMobile ? '50%' : '30%',
+              height: isMobile ? '50%' : '30%',
               pointerEvents: 'none',
               animation: 'cornerPulse 2.5s ease-in-out infinite, cornerGlow 2.5s ease-in-out infinite',
               borderRadius: '0 100% 0 0',

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import QuiltSquare from './QuiltSquare'
 
 function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = false, poweredUpSquares = new Set() }) {
@@ -9,7 +9,22 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
     hoveredIndex: null
   })
 
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   const handleDragStart = (index, pos) => {
+    // Haptic feedback on mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(50)
+    }
+
     setDragState({
       isDragging: true,
       sourceIndex: index,
@@ -27,6 +42,10 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   const handleDragEnd = () => {
     if (dragState.isDragging && dragState.hoveredIndex !== null &&
         dragState.hoveredIndex !== dragState.sourceIndex) {
+      // Success haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate([30, 50, 30])
+      }
       onPatternCopy(dragState.sourceIndex, dragState.hoveredIndex)
     }
     setDragState({
@@ -68,9 +87,12 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
           gridTemplateColumns: 'repeat(6, 1fr)',
           width: '100%',
           position: 'relative',
-          touchAction: dragState.isDragging ? 'none' : 'auto',
+          touchAction: isPreviewMode ? 'auto' : 'none',
           transition: 'width 0.3s ease, border 0.3s ease',
-          border: isPreviewMode ? '1px solid #d1d5db' : 'none'
+          border: isPreviewMode ? '1px solid #d1d5db' : 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          WebkitTouchCallout: 'none'
         }}
         onMouseMove={(e) => handleDragMove({ x: e.clientX, y: e.clientY })}
         onMouseUp={handleDragEnd}
@@ -89,6 +111,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
             isHovered={dragState.isDragging && dragState.hoveredIndex === index}
             isPreviewMode={isPreviewMode}
             isPoweredUp={poweredUpSquares.has(index)}
+            isMobile={isMobile}
           />
         ))}
       </div>
@@ -99,14 +122,17 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
           position: 'fixed',
           left: dragState.currentPos.x,
           top: dragState.currentPos.y,
-          width: '80px',
-          height: '80px',
+          width: isMobile ? '120px' : '80px',
+          height: isMobile ? '120px' : '80px',
           pointerEvents: 'none',
           zIndex: 1000,
-          opacity: 0.7,
+          opacity: 0.85,
           transform: 'translate(-50%, -50%)',
-          border: '2px solid #3b82f6',
-          backgroundColor: 'white'
+          border: '3px solid #3b82f6',
+          borderRadius: isMobile ? '8px' : '4px',
+          backgroundColor: 'white',
+          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
+          transition: 'transform 0.1s ease'
         }}>
           <div style={{
             width: '100%',
@@ -114,7 +140,9 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
             display: 'grid',
             gridTemplateColumns: 'repeat(16, 1fr)',
             gridTemplateRows: 'repeat(16, 1fr)',
-            gap: '0'
+            gap: '0',
+            borderRadius: isMobile ? '6px' : '2px',
+            overflow: 'hidden'
           }}>
             {squares[dragState.sourceIndex].map((row, rowIndex) =>
               row.map((color, colIndex) => (

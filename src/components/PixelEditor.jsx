@@ -460,25 +460,32 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             </button>
           </div>
 
-          {/* Color palette in 2x4 grid */}
+          {/* Color palette - horizontal scroll on short viewports, grid on normal */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gridTemplateRows: 'repeat(2, 1fr)',
-            gap: isShortViewport ? '6px' : '8px',
+            display: isShortViewport ? 'flex' : 'grid',
+            gridTemplateColumns: isShortViewport ? 'none' : 'repeat(4, 1fr)',
+            gridTemplateRows: isShortViewport ? 'none' : 'repeat(2, 1fr)',
+            gap: isShortViewport ? '8px' : '8px',
             maxWidth: isShortViewport ? 'none' : '400px',
-            margin: '0 auto'
+            margin: '0 auto',
+            overflowX: isShortViewport ? 'auto' : 'visible',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: isShortViewport ? '4px' : '0'
           }}>
             {COLORS.map((color) => (
               <button
                 key={color.value}
                 onClick={() => setSelectedColor(color.value)}
                 style={{
-                  width: '100%',
+                  width: isShortViewport ? '48px' : '100%',
+                  height: isShortViewport ? '48px' : 'auto',
                   aspectRatio: '1',
-                  minHeight: isShortViewport ? '36px' : '44px',
-                  maxHeight: isShortViewport ? '44px' : 'none',
-                  borderRadius: isShortViewport ? '3px' : '6px',
+                  flexShrink: isShortViewport ? 0 : 'initial',
+                  minHeight: isShortViewport ? '48px' : '44px',
+                  maxHeight: isShortViewport ? '48px' : 'none',
+                  borderRadius: '6px',
                   backgroundColor: color.value,
                   border: selectedColor === color.value ? '3px solid white' : '2px solid rgba(255,255,255,0.3)',
                   cursor: 'pointer',
@@ -490,6 +497,11 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               />
             ))}
           </div>
+          <style>{`
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
         </div>
 
         {/* Canvas - centered */}
@@ -691,13 +703,14 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             flexDirection: isShortViewport ? 'row' : 'column',
             gap: '8px',
             maxWidth: '400px',
-            margin: '0 auto'
+            margin: '0 auto',
           }}>
             <button
               onClick={onClose}
               style={{
                 width: '100%',
                 minHeight: '42px',
+
                 padding: '10px',
                 backgroundColor: 'transparent',
                 color: '#999',
