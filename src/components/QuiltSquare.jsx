@@ -61,40 +61,55 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         boxSizing: 'border-box'
       }}
     >
-      <div style={{
-        width: '100%',
-        height: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(16, 1fr)',
-        gridTemplateRows: 'repeat(16, 1fr)',
-        gap: '0',
-        lineHeight: '0',
-        imageRendering: 'pixelated',
-        WebkitFontSmoothing: 'none',
-        isolation: 'isolate'
-      }}>
-        {pixels.map((row, rowIndex) =>
-          row.map((color, colIndex) => (
-            <div
-              key={`${rowIndex}-${colIndex}`}
-              style={{
-                backgroundColor: color,
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                outline: 'none',
-                margin: '0',
-                padding: '0',
-                boxSizing: 'border-box',
-                display: 'block'
-              }}
-            />
-          ))
+      <>
+        {/* Hover scrim overlay */}
+        {isHovered && !isPreviewMode && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(16, 185, 129, 0.3)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }} />
         )}
-      </div>
 
-      {/* Visual indicator for drag corner */}
-      {!isPreviewMode && (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(16, 1fr)',
+          gridTemplateRows: 'repeat(16, 1fr)',
+          gap: '0',
+          lineHeight: '0',
+          imageRendering: 'pixelated',
+          WebkitFontSmoothing: 'none',
+          isolation: 'isolate'
+        }}>
+          {pixels.map((row, rowIndex) =>
+            row.map((color, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                style={{
+                  backgroundColor: color,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  margin: '0',
+                  padding: '0',
+                  boxSizing: 'border-box',
+                  display: 'block'
+                }}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Visual indicator for drag corner */}
+        {!isPreviewMode && (
         <>
           <style>{`
             @keyframes cornerPulse {
@@ -167,7 +182,8 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
             }} />
           )}
         </>
-      )}
+        )}
+      </>
     </div>
   )
 }

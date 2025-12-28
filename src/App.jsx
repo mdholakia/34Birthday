@@ -116,7 +116,7 @@ function App() {
   }, [history, editingSquare])
 
   return (
-    <div className="min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen p-2 sm:p-4 md:p-8" style={{ backgroundColor: '#121212' }}>
       <div className="max-w-6xl mx-auto">
         <div style={{
           display: 'flex',
