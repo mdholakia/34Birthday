@@ -152,9 +152,9 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
       style={{
         width: '100%',
         aspectRatio: '1',
-        backgroundColor: 'white',
-        borderLeft: isPreviewMode ? 'none' : '1px solid #eee',
-        borderTop: isPreviewMode ? 'none' : '1px solid #eee',
+        backgroundColor: '#F5EFEE',
+        borderLeft: isPreviewMode ? 'none' : '1px solid #d1d5db',
+        borderTop: isPreviewMode ? 'none' : '1px solid #d1d5db',
         cursor: 'pointer',
         position: 'relative',
         boxShadow: isPreviewMode ? 'none' : (isSource ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'),

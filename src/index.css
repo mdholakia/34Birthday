@@ -17,6 +17,16 @@ html, body {
   }
 }
 
+/* Hide scrollbar for quilt container */
+.quilt-container::-webkit-scrollbar {
+  display: none;
+}
+
+.quilt-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes fadeOut {
   from {
     opacity: 0.3;

@@ -198,18 +198,24 @@ function App() {
           </div>
         </div>
 
-        <div style={{
-          overflow: isPreviewMode ? 'visible' : 'auto',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          width: '100%',
-          height: isPreviewMode ? 'auto' : 'auto',
-          maxHeight: isPreviewMode ? 'none' : 'calc(var(--app-height, 100vh) - 150px)',
-          display: isPreviewMode ? 'flex' : 'block',
-          alignItems: isPreviewMode ? 'center' : 'stretch',
-          justifyContent: isPreviewMode ? 'center' : 'flex-start',
-          padding: isPreviewMode ? '20px' : '0'
-        }}>
+        <div
+          className="quilt-container"
+          style={{
+            overflow: isPreviewMode ? 'visible' : 'auto',
+            overflowX: 'hidden',
+            overflowY: mobileMode === 'drag' ? 'hidden' : 'auto',
+            width: '100%',
+            height: isPreviewMode ? 'auto' : 'auto',
+            maxHeight: isPreviewMode ? 'none' : 'calc(var(--app-height, 100vh) - 150px)',
+            display: isPreviewMode ? 'flex' : 'block',
+            alignItems: isPreviewMode ? 'center' : 'stretch',
+            justifyContent: isPreviewMode ? 'center' : 'flex-start',
+            padding: isPreviewMode ? '20px' : '0',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+        >
           <QuiltGrid
             squares={squares}
             onSquareClick={(index) => setEditingSquare(index)}
