@@ -17,6 +17,7 @@ function App() {
   const [showChatModal, setShowChatModal] = useState(false)
   const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
   const [mobileMode, setMobileMode] = useState('drag') // 'scroll' | 'drag'
+  const [hasEditedBefore, setHasEditedBefore] = useState(false)
 
   // Freeze viewport height on mount to prevent mobile browser recalculations
   useEffect(() => {
@@ -57,8 +58,21 @@ function App() {
     setSquares(newSquares)
     set(ref(db, 'squares'), newSquares)
 
-    // Add powerup animation to this square
-    setPoweredUpSquares(prev => new Set([...prev, index]))
+    // Only show animation on first edit
+    if (!hasEditedBefore) {
+      setHasEditedBefore(true)
+      // Add powerup animation to this square
+      setPoweredUpSquares(prev => new Set([...prev, index]))
+
+      // Remove powerup after 3 seconds
+      setTimeout(() => {
+        setPoweredUpSquares(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(index)
+          return newSet
+        })
+      }, 3000)
+    }
   }
 
   const copySquarePattern = (fromIndex, toIndex) => {
@@ -147,6 +161,32 @@ function App() {
             alignItems: 'center',
             gap: '8px'
           }}>
+            {editingSquare === null && (
+              <button
+                onClick={undo}
+                style={{
+                  height: '44px',
+                  padding: '10px 14px',
+                  backgroundColor: '#ffffff',
+                  color: '#1f2937',
+                  border: '2px solid #6b7280',
+                  borderRadius: '6px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Undo"
+              >
+                <span style={{ fontSize: '20px' }}>⏪</span>
+                <span>Undo</span>
+              </button>
+            )}
+
             <button
               onClick={() => setShowChatModal(true)}
               style={{

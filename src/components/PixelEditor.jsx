@@ -59,7 +59,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
     }
   }, [])
 
-  const HALO_SIZE = isMobile ? 2 : 4
+  const HALO_SIZE = isMobile ? 1 : 4
   const TOTAL_SIZE = HALO_SIZE + GRID_SIZE + HALO_SIZE
 
   // Calculate adjacent square indices (6-column layout)
@@ -531,8 +531,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '12px',
+            justifyContent: 'flex-start',
+            padding: '0',
             overflow: 'hidden',
             minHeight: 0,
             position: 'relative'
@@ -558,8 +558,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               gridTemplateRows: `repeat(${TOTAL_SIZE}, 1fr)`,
               gap: '0',
               backgroundColor: '#F5EFEE',
-              width: '90vw',
-              height: '90vw',
+              width: '100vw',
+              height: '100vw',
               maxWidth: '600px',
               maxHeight: '600px',
               aspectRatio: '1',
@@ -656,32 +656,60 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleClear}
               style={{
-                padding: isShortViewport ? '4px 8px' : '6px 12px',
+                minHeight: isShortViewport ? '40px' : '48px',
+                padding: isShortViewport ? '0 16px' : '0 20px',
                 borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: isShortViewport ? '10px' : '12px',
-                fontWeight: '500',
+                fontSize: isShortViewport ? '12px' : '14px',
+                fontWeight: '600',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                backdropFilter: 'blur(4px)'
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                whiteSpace: 'nowrap'
               }}
             >
               Clear Canvas
             </button>
             <button
-              onClick={handleRotateCounterClockwise}
+              onClick={handleLocalUndo}
               style={{
-                minWidth: isShortViewport ? '24px' : '32px',
-                minHeight: isShortViewport ? '24px' : '32px',
+                minWidth: isShortViewport ? '40px' : '48px',
+                minHeight: isShortViewport ? '40px' : '48px',
                 padding: '2px',
                 borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: isShortViewport ? '14px' : '16px',
+                fontSize: isShortViewport ? '20px' : '24px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(4px)'
+              }}
+              title="Undo"
+            >
+              ⏪
+            </button>
+            <button
+              onClick={handleRotateCounterClockwise}
+              style={{
+                minWidth: isShortViewport ? '40px' : '48px',
+                minHeight: isShortViewport ? '40px' : '48px',
+                padding: '2px',
+                borderRadius: '4px',
+                border: '1px solid #333',
+                cursor: 'pointer',
+                backgroundColor: 'rgba(245, 239, 238, 0.95)',
+                color: '#333',
+                fontSize: isShortViewport ? '20px' : '24px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
@@ -696,15 +724,15 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleRotateClockwise}
               style={{
-                minWidth: isShortViewport ? '24px' : '32px',
-                minHeight: isShortViewport ? '24px' : '32px',
+                minWidth: isShortViewport ? '40px' : '48px',
+                minHeight: isShortViewport ? '40px' : '48px',
                 padding: '2px',
                 borderRadius: '4px',
                 border: '1px solid #333',
                 cursor: 'pointer',
                 backgroundColor: 'rgba(245, 239, 238, 0.95)',
                 color: '#333',
-                fontSize: isShortViewport ? '14px' : '16px',
+                fontSize: isShortViewport ? '20px' : '24px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
@@ -1051,6 +1079,27 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               }}
             >
               Clear Canvas
+            </button>
+            <button
+              onClick={handleLocalUndo}
+              style={{
+                flex: 1,
+                padding: '12px',
+                borderRadius: '8px',
+                border: '2px solid #ddd',
+                cursor: 'pointer',
+                backgroundColor: 'white',
+                fontSize: '16px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px'
+              }}
+              title="Undo"
+            >
+              <span style={{ fontSize: '20px' }}>⏪</span>
+              <span style={{ fontSize: '12px' }}>Z</span>
             </button>
             <button
               onClick={handleRotateClockwise}

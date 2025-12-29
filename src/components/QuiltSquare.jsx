@@ -180,60 +180,73 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         {!isPreviewMode && (
         <>
           <style>{`
-            @keyframes cornerPulse {
-              0%, 100% {
-                background: radial-gradient(
-                  circle at 0% 100%,
-                  rgba(59, 130, 246, 0.8) 0%,
-                  rgba(59, 130, 246, 0.4) 40%,
-                  transparent 70%
-                );
-                transform: scale(1);
+            @keyframes dragTrailDot {
+              0% {
+                transform: translate(0, -100%);
+                opacity: 1;
               }
-              33% {
-                background: radial-gradient(
-                  circle at 0% 100%,
-                  rgba(139, 92, 246, 0.9) 0%,
-                  rgba(139, 92, 246, 0.5) 40%,
-                  transparent 70%
-                );
-                transform: scale(1.1);
+              70% {
+                opacity: 1;
               }
-              66% {
-                background: radial-gradient(
-                  circle at 0% 100%,
-                  rgba(236, 72, 153, 0.8) 0%,
-                  rgba(236, 72, 153, 0.4) 40%,
-                  transparent 70%
-                );
-                transform: scale(1.05);
+              100% {
+                transform: translate(0, 200%);
+                opacity: 0;
               }
             }
 
-            @keyframes cornerGlow {
-              0%, 100% {
-                filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.8));
+            @keyframes dragTrailFade {
+              0% {
+                opacity: 0;
+                height: 0%;
               }
-              50% {
-                filter: drop-shadow(0 0 8px rgba(139, 92, 246, 1));
+              30% {
+                opacity: 0.4;
+                height: 20%;
+              }
+              60% {
+                opacity: 0.3;
+                height: 50%;
+              }
+              100% {
+                opacity: 0;
+                height: 80%;
               }
             }
           `}</style>
 
 
-          {/* Powered-up corner glow (only after editing) */}
+          {/* Drag trail tutorial (only on first edit) */}
           {isPoweredUp && (
-            <div style={{
-              position: 'absolute',
-              bottom: '0',
-              left: '0',
-              width: isMobile ? '50%' : '30%',
-              height: isMobile ? '50%' : '30%',
-              pointerEvents: 'none',
-              animation: 'cornerPulse 2.5s ease-in-out infinite, cornerGlow 2.5s ease-in-out infinite',
-              borderRadius: '0 100% 0 0',
-              transformOrigin: 'bottom left'
-            }} />
+            <>
+              {/* Animated dot that drags down */}
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                left: '0',
+                width: isMobile ? '16px' : '12px',
+                height: isMobile ? '16px' : '12px',
+                pointerEvents: 'none',
+                animation: 'dragTrailDot 2s ease-in-out infinite',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                boxShadow: '0 0 8px rgba(59, 130, 246, 0.6)',
+                transformOrigin: 'center',
+                zIndex: 3
+              }} />
+
+              {/* Trail that follows the dot */}
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                left: isMobile ? '8px' : '6px',
+                width: '2px',
+                pointerEvents: 'none',
+                animation: 'dragTrailFade 2s ease-in-out infinite',
+                background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.6), transparent)',
+                transformOrigin: 'bottom',
+                zIndex: 2
+              }} />
+            </>
           )}
 
           {/* Copy icon on desktop hover */}
