@@ -208,8 +208,7 @@ function App() {
           display: isPreviewMode ? 'flex' : 'block',
           alignItems: isPreviewMode ? 'center' : 'stretch',
           justifyContent: isPreviewMode ? 'center' : 'flex-start',
-          padding: isPreviewMode ? '20px' : '0',
-          WebkitOverflowScrolling: 'touch'
+          padding: isPreviewMode ? '20px' : '0'
         }}>
           <QuiltGrid
             squares={squares}
@@ -311,6 +310,8 @@ function App() {
         {!isPreviewMode && editingSquare === null && typeof window !== 'undefined' && window.innerWidth < 768 && (
           <button
             onClick={() => setMobileMode(prev => prev === 'scroll' ? 'drag' : 'scroll')}
+            aria-pressed={mobileMode === 'drag'}
+            aria-label={mobileMode === 'drag' ? 'Exit drag mode' : 'Enter drag mode'}
             style={{
               position: 'fixed',
               bottom: '20px',
