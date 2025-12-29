@@ -261,44 +261,6 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         </div>
       )}
 
-      {/* Edge scroll zone indicators */}
-      {dragState.isDragging && isMobile && mobileMode === 'drag' && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: 'none',
-          zIndex: 999
-        }}>
-          {/* Top zone */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '60px',
-            background: autoScroll.direction.y < 0
-              ? 'linear-gradient(to bottom, rgba(59, 130, 246, 0.15), transparent)'
-              : 'linear-gradient(to bottom, rgba(59, 130, 246, 0.05), transparent)',
-            transition: 'background 0.15s ease'
-          }} />
-
-          {/* Bottom zone */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '60px',
-            background: autoScroll.direction.y > 0
-              ? 'linear-gradient(to top, rgba(59, 130, 246, 0.15), transparent)'
-              : 'linear-gradient(to top, rgba(59, 130, 246, 0.05), transparent)',
-            transition: 'background 0.15s ease'
-          }} />
-        </div>
-      )}
     </>
   )
 }

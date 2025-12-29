@@ -16,7 +16,7 @@ function App() {
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [showChatModal, setShowChatModal] = useState(false)
   const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
-  const [mobileMode, setMobileMode] = useState('scroll') // 'scroll' | 'drag'
+  const [mobileMode, setMobileMode] = useState('drag') // 'scroll' | 'drag'
 
   // Freeze viewport height on mount to prevent mobile browser recalculations
   useEffect(() => {
@@ -201,19 +201,13 @@ function App() {
         <div
           className="quilt-container"
           style={{
-            overflow: isPreviewMode ? 'visible' : 'auto',
-            overflowX: 'hidden',
-            overflowY: mobileMode === 'drag' ? 'hidden' : 'auto',
+            overflow: 'visible',
             width: '100%',
-            height: isPreviewMode ? 'auto' : 'auto',
-            maxHeight: isPreviewMode ? 'none' : 'calc(var(--app-height, 100vh) - 150px)',
+            height: 'auto',
             display: isPreviewMode ? 'flex' : 'block',
             alignItems: isPreviewMode ? 'center' : 'stretch',
             justifyContent: isPreviewMode ? 'center' : 'flex-start',
-            padding: isPreviewMode ? '20px' : '0',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none'
+            padding: isPreviewMode ? '20px' : '0'
           }}
         >
           <QuiltGrid
@@ -333,34 +327,7 @@ borderBottom: '1px'              }}>
           </div>
         )}
 
-        {/* Mobile Copy toggle button */}
-        {!isPreviewMode && editingSquare === null && typeof window !== 'undefined' && window.innerWidth < 768 && (
-          <button
-            onClick={() => setMobileMode(prev => prev === 'scroll' ? 'drag' : 'scroll')}
-            aria-pressed={mobileMode === 'drag'}
-            aria-label={mobileMode === 'drag' ? 'Exit drag mode' : 'Enter drag mode'}
-            style={{
-              position: 'fixed',
-              bottom: '20px',
-              right: '20px',
-              minWidth: '70px',
-              minHeight: '44px',
-              padding: '10px 16px',
-              backgroundColor: mobileMode === 'drag' ? '#3b82f6' : '#ffffff',
-              color: mobileMode === 'drag' ? '#ffffff' : '#6b7280',
-              border: `2px solid ${mobileMode === 'drag' ? '#3b82f6' : '#d1d5db'}`,
-              borderRadius: '22px',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-              zIndex: 1000,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Copy
-          </button>
-        )}
+        {/* Mobile Copy toggle button - Removed, using long-press only */}
       </div>
     </div>
   )

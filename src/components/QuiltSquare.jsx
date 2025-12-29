@@ -7,11 +7,8 @@ const CANCEL_THRESHOLD = 10 // px
 
 function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false, isMobile = false, mobileMode = 'scroll' }) {
   const [isHovering, setIsHovering] = useState(false)
-  const [isLongPressing, setIsLongPressing] = useState(false)
   const touchStartPos = useRef(null)
   const touchMode = useRef(null) // 'drag' | 'scroll' | null
-  const longPressTimer = useRef(null)
-  const longPressStartTime = useRef(null)
 
   const checkLowerLeftCorner = (clientX, clientY, rect) => {
     const x = clientX - rect.left
@@ -34,88 +31,38 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
   }
 
   const handleTouchStart = (e) => {
-    // Mobile: track touch position for motion-based detection
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
     touchMode.current = null // Reset mode for new touch
-
-    // Long-press shortcut for one-shot drag (only in scroll mode)
-    if (isMobile && mobileMode === 'scroll') {
-      longPressStartTime.current = Date.now()
-
-      // Visual feedback after 100ms
-      setTimeout(() => {
-        if (longPressStartTime.current && Date.now() - longPressStartTime.current >= 100) {
-          setIsLongPressing(true)
-        }
-      }, 100)
-
-      // Trigger drag after 400ms
-      longPressTimer.current = setTimeout(() => {
-        if (touchStartPos.current) {
-          // Flash effect to confirm activation
-          setIsLongPressing(false)
-          e.preventDefault()
-          onDragStart({ x: touch.clientX, y: touch.clientY })
-        }
-      }, 400)
-    }
   }
 
   const handleTouchMove = (e) => {
-    // Motion-based detection: horizontal drag vs vertical scroll
     if (!touchStartPos.current) return
 
     const touch = e.touches[0]
     const dx = Math.abs(touch.clientX - touchStartPos.current.x)
     const dy = Math.abs(touch.clientY - touchStartPos.current.y)
 
-    // Cancel long-press if user moves finger
-    if (longPressTimer.current && (dx > 10 || dy > 10)) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-      longPressStartTime.current = null
-      setIsLongPressing(false)
-    }
-
-    // Ignore tiny movements
+    // Ignore tiny movements (finger jitter)
     if (dx < CANCEL_THRESHOLD && dy < CANCEL_THRESHOLD) return
 
-    // Mode-based behavior
-    if (mobileMode === 'scroll') {
-      // In scroll mode: any motion = scroll, no drag (unless long-press triggered)
-      if (!longPressTimer.current) {
-        touchMode.current = 'scroll'
-      }
-      return
-    }
-
-    // In drag mode: any significant motion triggers drag
+    // In drag mode (now the default): simple drag to copy
     if (mobileMode === 'drag') {
       if (dx > HORIZONTAL_DRAG_THRESHOLD || dy > HORIZONTAL_DRAG_THRESHOLD) {
         touchMode.current = 'drag'
-        e.preventDefault() // Prevent scroll in drag mode
+        e.preventDefault()
         onDragStart({ x: touch.clientX, y: touch.clientY })
       }
-      return
     }
   }
 
   const handleTouchEnd = () => {
-    // Clear long-press timer
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-    }
-    longPressStartTime.current = null
-    setIsLongPressing(false)
-
-    // If no mode was ever chosen, treat as tap → open editor
+    // If no mode was chosen, treat as tap → open editor
     if (touchStartPos.current && touchMode.current === null) {
       onClick()
     }
 
-    // Reset all state for next touch
+    // Reset for next touch
     touchStartPos.current = null
     touchMode.current = null
   }
@@ -161,7 +108,7 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         transition: 'box-shadow 0.15s ease, transform 0.1s ease-out',
         boxSizing: 'border-box',
         touchAction: isMobile ? (mobileMode === 'drag' ? 'none' : 'auto') : 'auto',
-        transform: isLongPressing ? 'scale(1.02)' : 'scale(1)',
+        transform: 'scale(1)',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none'
@@ -307,65 +254,6 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
             </div>
           )}
 
-          {/* Drag mode corner indicators - mobile only */}
-          {isMobile && mobileMode === 'drag' && !isPreviewMode && (
-            <>
-              <style>{`
-                @keyframes fadeIn {
-                  from { opacity: 0; }
-                  to { opacity: 1; }
-                }
-              `}</style>
-              <div style={{
-                position: 'absolute',
-                top: '4px',
-                left: '4px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#3b82f6',
-                pointerEvents: 'none',
-                zIndex: 1,
-                animation: 'fadeIn 0.2s ease-in'
-              }} />
-              <div style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#3b82f6',
-                pointerEvents: 'none',
-                zIndex: 1,
-                animation: 'fadeIn 0.2s ease-in'
-              }} />
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                left: '4px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#3b82f6',
-                pointerEvents: 'none',
-                zIndex: 1,
-                animation: 'fadeIn 0.2s ease-in'
-              }} />
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                right: '4px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#3b82f6',
-                pointerEvents: 'none',
-                zIndex: 1,
-                animation: 'fadeIn 0.2s ease-in'
-              }} />
-            </>
-          )}
         </>
         )}
       </>
