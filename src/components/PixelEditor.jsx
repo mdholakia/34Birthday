@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import UndoIcon from '../assets/icons/UndoIcon'
+import RotateCCWIcon from '../assets/icons/RotateCCWIcon'
+import RotateCWIcon from '../assets/icons/RotateCWIcon'
 
 const COLORS = [
   // Row 1 (top row in Frame 14, left to right)
@@ -29,6 +32,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const [justFilled, setJustFilled] = useState(false)
   const [localHistory, setLocalHistory] = useState([])
   const [isShortViewport, setIsShortViewport] = useState(() => typeof window !== 'undefined' && window.innerHeight < 700)
+  const [canvasSize, setCanvasSize] = useState(600)
 
   // Drawing session tracking for debounced undo
   const drawingSessionStartRef = useRef(null)
@@ -50,6 +54,20 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
     return () => window.removeEventListener('resize', checkViewportHeight)
   }, [])
 
+  // Calculate dynamic canvas size for mobile - disabled, using CSS instead
+  useEffect(() => {
+    if (!isMobile) return
+
+    // Set to viewport width to make it responsive
+    const calculateCanvasSize = () => {
+      setCanvasSize(Math.min(window.innerWidth, 600))
+    }
+
+    calculateCanvasSize()
+    window.addEventListener('resize', calculateCanvasSize)
+    return () => window.removeEventListener('resize', calculateCanvasSize)
+  }, [isMobile])
+
   // Cleanup debounce timeout on unmount
   useEffect(() => {
     return () => {
@@ -62,9 +80,9 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const HALO_SIZE = isMobile ? 1 : 4
   const TOTAL_SIZE = HALO_SIZE + GRID_SIZE + HALO_SIZE
 
-  // Calculate adjacent square indices (6-column layout)
+  // Calculate adjacent square indices (5-column layout)
   const adjacentSquares = useMemo(() => {
-    const cols = 6
+    const cols = 5
     const total = allSquares.length
 
     const top = squareIndex >= cols ? squareIndex - cols : null
@@ -356,12 +374,12 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handleClear = () => {
     saveToLocalHistory()
-    setEditedPixels(Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE')))
+    setEditedPixels(Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('rgb(237, 232, 231)')))
   }
 
   const handleRotateClockwise = () => {
     saveToLocalHistory()
-    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE'))
+    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('rgb(237, 232, 231)'))
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
         newPixels[col][GRID_SIZE - 1 - row] = editedPixels[row][col]
@@ -372,7 +390,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
 
   const handleRotateCounterClockwise = () => {
     saveToLocalHistory()
-    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#F5EFEE'))
+    const newPixels = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('rgb(237, 232, 231)'))
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
         newPixels[GRID_SIZE - 1 - col][row] = editedPixels[row][col]
@@ -430,7 +448,10 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             gap: '0',
             marginBottom: '10px',
             maxWidth: '400px',
-            margin: '0 auto 10px auto'
+            margin: '0 auto 10px auto',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '6px',
+            overflow: 'hidden'
           }}>
             <button
               onClick={() => setToolMode('draw')}
@@ -438,11 +459,11 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 flex: 1,
                 minHeight: '36px',
                 padding: '8px',
-                borderRadius: '6px 0 0 6px',
                 border: 'none',
+                borderRight: toolMode === 'draw' ? 'none' : '1px solid rgba(255,255,255,0.3)',
                 cursor: 'pointer',
-                backgroundColor: toolMode === 'draw' ? '#a5b4fc' : 'white',
-                color: toolMode === 'draw' ? 'white' : '#333',
+                backgroundColor: toolMode === 'draw' ? '#a5b4fc' : 'transparent',
+                color: toolMode === 'draw' ? 'white' : '#EEEEEE',
                 fontSize: '14px',
                 fontWeight: '500',
                 transition: 'all 0.2s',
@@ -461,11 +482,10 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 flex: 1,
                 minHeight: '36px',
                 padding: '8px',
-                borderRadius: '0 6px 6px 0',
                 border: 'none',
                 cursor: 'pointer',
-                backgroundColor: toolMode === 'bucket' ? '#a5b4fc' : 'white',
-                color: toolMode === 'bucket' ? 'white' : '#333',
+                backgroundColor: toolMode === 'bucket' ? '#a5b4fc' : 'transparent',
+                color: toolMode === 'bucket' ? 'white' : '#EEEEEE',
                 fontSize: '14px',
                 fontWeight: '500',
                 transition: 'all 0.2s',
@@ -524,7 +544,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
           `}</style>
         </div>
 
-        {/* Canvas - centered */}
+        {/* Canvas and controls section */}
         <div
           style={{
             flex: 1,
@@ -532,19 +552,20 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            padding: '0',
-            overflow: 'hidden',
-            minHeight: 0,
-            position: 'relative'
+            padding: '8px 0',
+            overflow: 'auto',
+            minHeight: 0
           }}
         >
           {/* Canvas container */}
           <div
             style={{
               touchAction: 'none',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              position: 'relative'
+              width: `min(100vw, ${canvasSize}px, 100%)`,
+              aspectRatio: '1',
+              margin: '0 auto',
+              flexShrink: 1,
+              maxHeight: '100%'
             }}
             onMouseDown={() => setIsDrawing(true)}
             onMouseUp={() => setIsDrawing(false)}
@@ -558,11 +579,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               gridTemplateRows: `repeat(${TOTAL_SIZE}, 1fr)`,
               gap: '0',
               backgroundColor: '#F5EFEE',
-              width: '100vw',
-              height: '100vw',
-              maxWidth: '600px',
-              maxHeight: '600px',
-              aspectRatio: '1',
+              width: '100%',
+              height: '100%',
               position: 'relative'
             }}>
               {displayGrid.map((row, rowIndex) =>
@@ -640,19 +658,17 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
                 }} />
               )}
             </div>
+          </div>
 
-            {/* Control buttons - overlaid on bottom halo */}
-            <div style={{
-              position: 'absolute',
-              top: `${((HALO_SIZE + GRID_SIZE) / TOTAL_SIZE) * 100}%`,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              gap: '6px',
-              justifyContent: 'center',
-              zIndex: 10,
-              marginTop: '24px'
-            }}>
+          {/* Control buttons - below canvas */}
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            justifyContent: 'center',
+            marginTop: '12px',
+            padding: '0 10px',
+            flexShrink: 0
+          }}>
             <button
               onClick={handleClear}
               style={{
@@ -696,7 +712,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               }}
               title="Undo"
             >
-              ⏪
+              <UndoIcon color="#333" size={isShortViewport ? 16 : 20} />
             </button>
             <button
               onClick={handleRotateCounterClockwise}
@@ -719,7 +735,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               }}
               title="Rotate Counter-Clockwise"
             >
-              ↺
+              <RotateCCWIcon color="#333" size={isShortViewport ? 16 : 20} />
             </button>
             <button
               onClick={handleRotateClockwise}
@@ -742,9 +758,8 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               }}
               title="Rotate Clockwise"
             >
-              ↻
+              <RotateCWIcon color="#333" size={isShortViewport ? 16 : 20} />
             </button>
-            </div>
           </div>
         </div>
 
@@ -956,7 +971,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
       {/* Right side - 40% - Control Panel */}
       <div style={{
         width: '40%',
-        backgroundColor: 'white',
+        backgroundColor: '#121212',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -964,55 +979,43 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
       }}>
         {/* Header - Fixed */}
         <div style={{
-          padding: '40px 40px 20px 40px',
+          padding: '24px 24px 20px 24px',
           flexShrink: 0
         }}>
-          <h2 style={{
-            fontSize: '48px',
-            fontWeight: '400',
-            fontStyle: 'italic',
-            marginBottom: '8px',
-            fontFamily: 'Georgia, serif'
+          <div style={{
+            display: 'flex',
+            gap: '0',
+            marginBottom: '16px',
+            border: '1px solid #767676',
+            borderRadius: '8px',
+            overflow: 'hidden'
           }}>
-            Edit square
-          </h2>
-          <p style={{
-            fontSize: '16px',
-            color: '#666',
-            marginBottom: '24px',
-            fontWeight: '400'
-          }}>
-            Draw a pattern or a symbol!
-          </p>
-
-          <div style={{ display: 'flex', gap: '0', marginBottom: '24px' }}>
             <button
               onClick={() => setToolMode('draw')}
               style={{
                 flex: 1,
-                padding: '12px',
-                borderRadius: '8px 0 0 8px',
-                border: '2px solid #ddd',
-                borderRight: '1px solid #ddd',
+                padding: '12px 16px',
+                border: 'none',
+                borderRight: toolMode === 'draw' ? 'none' : '1px solid #767676',
                 cursor: 'pointer',
-                backgroundColor: toolMode === 'draw' ? '#e8e8ff' : 'white',
+                backgroundColor: toolMode === 'draw' ? '#B0B4FF' : 'transparent',
+                color: toolMode === 'draw' ? '#FFFFFF' : '#EEEEEE',
                 fontSize: '16px',
                 fontWeight: '500',
                 transition: 'all 0.2s'
               }}
             >
-              ✏️ Draw
+              🖌️ Draw
             </button>
             <button
               onClick={() => setToolMode('bucket')}
               style={{
                 flex: 1,
-                padding: '12px',
-                borderRadius: '0 8px 8px 0',
-                border: '2px solid #ddd',
-                borderLeft: '1px solid #ddd',
+                padding: '12px 16px',
+                border: 'none',
                 cursor: 'pointer',
-                backgroundColor: toolMode === 'bucket' ? '#e8e8ff' : 'white',
+                backgroundColor: toolMode === 'bucket' ? '#B0B4FF' : 'transparent',
+                color: toolMode === 'bucket' ? '#FFFFFF' : '#EEEEEE',
                 fontSize: '16px',
                 fontWeight: '500',
                 transition: 'all 0.2s'
@@ -1021,61 +1024,93 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
               🪣 Fill
             </button>
           </div>
+
+          {/* Separator Line */}
+          <div style={{
+            height: '1px',
+            backgroundColor: '#767676',
+            margin: '0'
+          }} />
         </div>
 
         {/* Scrollable Middle Section */}
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '0 40px',
+          padding: '24px',
           minHeight: 0
         }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '8px',
+            gap: '21px 31px',
             marginBottom: '24px',
-            maxWidth: '200px'
+            maxWidth: '386px',
+            margin: '0 auto'
           }}>
             {COLORS.map((color) => (
               <button
                 key={color.value}
                 onClick={() => setSelectedColor(color.value)}
                 style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '8px',
-                  border: selectedColor === color.value ? '3px solid #333' : '2px solid #ddd',
+                  width: '70.5px',
+                  height: '70.5px',
+                  borderRadius: '6px',
+                  border: selectedColor === color.value ? '3px solid #FFFFFF' : '2px solid rgba(255,255,255,0.2)',
                   cursor: 'pointer',
                   backgroundColor: color.value,
                   padding: 0,
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  boxShadow: selectedColor === color.value ? '0 0 0 1px #121212, 0 0 0 4px #FFFFFF' : 'none'
                 }}
                 aria-label={color.value}
               />
             ))}
           </div>
+
+          <p style={{
+            fontSize: '14px',
+            color: '#B3B3B3',
+            fontWeight: '400',
+            textAlign: 'center',
+            maxWidth: '386px',
+            margin: '0 auto',
+            marginTop:' 24px'
+          }}>
+            Draw a pattern or picture.{' '}
+            <a
+              href="https://pin.it/1WGUJMmO5"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#B0B4FF',
+                textDecoration: 'underline'
+              }}
+            >
+              Inspiration here
+            </a>.
+          </p>
         </div>
 
         {/* Footer - Fixed */}
         <div style={{
-          padding: '20px 40px 40px 40px',
-          flexShrink: 0,
-          borderTop: '1px solid #eee'
+          padding: '20px 24px 24px 24px',
+          flexShrink: 0
         }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
             <button
               onClick={handleClear}
               style={{
-                flex: 2,
+                flex: 1,
                 padding: '12px 16px',
                 borderRadius: '8px',
-                border: '2px solid #ddd',
+                border: '1px solid #767676',
                 cursor: 'pointer',
-                backgroundColor: 'white',
-                color: '#333',
+                backgroundColor: 'transparent',
+                color: '#B3B3B3',
                 fontSize: '14px',
-                fontWeight: '500'
+                fontWeight: '400',
+                transition: 'all 0.2s'
               }}
             >
               Clear Canvas
@@ -1083,65 +1118,68 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             <button
               onClick={handleLocalUndo}
               style={{
-                flex: 1,
-                padding: '12px',
+                padding: '12px 16px',
                 borderRadius: '8px',
-                border: '2px solid #ddd',
+                border: '1px solid #767676',
                 cursor: 'pointer',
-                backgroundColor: 'white',
-                fontSize: '16px',
-                fontWeight: '500',
+                backgroundColor: 'transparent',
+                color: '#B3B3B3',
+                fontSize: '14px',
+                fontWeight: '400',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '4px'
+                gap: '6px',
+                transition: 'all 0.2s'
               }}
               title="Undo"
             >
-              <span style={{ fontSize: '20px' }}>⏪</span>
-              <span style={{ fontSize: '12px' }}>Z</span>
-            </button>
-            <button
-              onClick={handleRotateClockwise}
-              style={{
-                flex: 1,
-                padding: '12px',
-                borderRadius: '8px',
-                border: '2px solid #ddd',
-                cursor: 'pointer',
-                backgroundColor: 'white',
-                fontSize: '16px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px'
-              }}
-              title="Rotate Clockwise"
-            >
-              <span style={{ fontSize: '20px' }}>↻</span>
-              <span style={{ fontSize: '12px' }}>R</span>
+              <UndoIcon color="#B3B3B3" size={16} />
+              <span>Undo</span>
             </button>
             <button
               onClick={handleRotateCounterClockwise}
               style={{
-                flex: 1,
-                padding: '12px',
+                padding: '12px 16px',
                 borderRadius: '8px',
-                border: '2px solid #ddd',
+                border: '1px solid #767676',
                 cursor: 'pointer',
-                backgroundColor: 'white',
-                fontSize: '16px',
-                fontWeight: '500',
+                backgroundColor: 'transparent',
+                color: '#B3B3B3',
+                fontSize: '14px',
+                fontWeight: '400',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '4px'
+                gap: '6px',
+                transition: 'all 0.2s'
               }}
               title="Rotate Counter-Clockwise"
             >
-              <span style={{ fontSize: '20px' }}>↺</span>
-              <span style={{ fontSize: '12px' }}>L</span>
+              <span style={{ fontWeight: 'bold' }}>L</span>
+              <RotateCCWIcon color="#B3B3B3" size={16} />
+            </button>
+            <button
+              onClick={handleRotateClockwise}
+              style={{
+                padding: '12px 16px',
+                borderRadius: '8px',
+                border: '1px solid #767676',
+                cursor: 'pointer',
+                backgroundColor: 'transparent',
+                color: '#B3B3B3',
+                fontSize: '14px',
+                fontWeight: '400',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s'
+              }}
+              title="Rotate Clockwise"
+            >
+              <span style={{ fontWeight: 'bold' }}>R</span>
+              <RotateCWIcon color="#B3B3B3" size={16} />
             </button>
           </div>
 
@@ -1150,14 +1188,15 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             style={{
               width: '100%',
               padding: '16px',
-              backgroundColor: '#000',
-              color: 'white',
+              backgroundColor: '#FFFFFF',
+              color: '#303030',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '18px',
+              fontSize: '16px',
               fontWeight: '500',
-              marginBottom: '12px'
+              marginBottom: '12px',
+              transition: 'all 0.2s'
             }}
           >
             Save changes
@@ -1167,13 +1206,14 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             style={{
               width: '100%',
               padding: '16px',
-              // backgroundColor: 'grey',
-              color: '#333',
-              border: '2px solid #ddd',
+              backgroundColor: 'transparent',
+              color: '#F3F3F3',
+              border: '1px solid #767676',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '18px',
-              fontWeight: '500'
+              fontSize: '16px',
+              fontWeight: '500',
+              transition: 'all 0.2s'
             }}
           >
             Cancel

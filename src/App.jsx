@@ -324,27 +324,27 @@ function App() {
                 marginBottom: '20px'
               }}>
 <>
-      <p>Hello!</p>
+      <p>Welcome friend!</p>
 
       <p>This is my 6th annual birthday website (wah!).</p>
       
       <p>
-        This year, we're collaboratively creating a pixel art piece! Then I'll be getting the piece 
-        woven by the good folks at{' '}
+        This year, we're collaboratively creating a pixel art piece!  I'll be getting the piece 
+        woven by the good folks at{'Pure Country Weavers '}
         <a href="https://photoweavers.com/collections/all-products/products/60-x-50-small-woven-throw-portrait" style={{
                 color: '#006affff',
 borderBottom: '1px'              }}>
           a North Carolina based mill
         </a>{' '}
-        using a Jacquard loom; a reference to programming's origins in weaving and a love letter to{' '}
+        using a Jacquard loom; a reference to programming's origins in weaving. This is also a love letter to{' '}
         <a href="http://red-green-blue.com/kid-pix-the-early-years">KidPix</a>, pixel art 
-        (shoutout to Susan Kare's iconic work), and geometric designs in folk art.
+        (shoutout to Susan Kare's iconic work for Mac + videogames), and geometric designs in folk art.
       </p>
       
       <p>
         This year was big one for me and next year is shaping up the same way. I'll treasure having your wishes and doodles as a tangible, snuggalable object. 
       </p>
-      
+        <p>all my love,</p>
       <p>Meghna</p>
     </>              </span>
               <button
