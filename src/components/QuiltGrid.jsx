@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import QuiltSquare from './QuiltSquare'
 
-function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = false, poweredUpSquares = new Set() }) {
+function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = false, poweredUpSquares = new Set(), mobileMode = 'scroll' }) {
   const [dragState, setDragState] = useState({
     isDragging: false,
     sourceIndex: null,
@@ -110,7 +110,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
           display: 'grid',
           gridTemplateColumns: 'repeat(6, 1fr)',
           gridAutoRows: '1fr',
-          width: '100%',
+          width: isMobile ? 'max(100%, 642px)' : '100%',
           position: 'relative',
           touchAction: isPreviewMode ? 'auto' : (dragState.isDragging ? 'none' : 'auto'),
           contain: 'layout paint',
@@ -138,6 +138,7 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
             isPreviewMode={isPreviewMode}
             isPoweredUp={poweredUpSquares.has(index)}
             isMobile={isMobile}
+            mobileMode={mobileMode}
           />
         ))}
       </div>
