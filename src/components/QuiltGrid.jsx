@@ -10,7 +10,19 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
   })
 
   const [isMobile, setIsMobile] = useState(false)
+  const [autoScroll, setAutoScroll] = useState({
+    active: false,
+    direction: { x: 0, y: 0 },
+    velocity: 1
+  })
   const containerRef = useRef(null)
+  const autoScrollRaf = useRef(null)
+
+  // Edge-based auto-scroll constants
+  const EDGE_SCROLL_ZONE = 60 // px from edge to trigger scroll
+  const MIN_SCROLL_VELOCITY = 2 // px per frame
+  const MAX_SCROLL_VELOCITY = 12 // px per frame
+  const VELOCITY_RAMP = 0.8 // How quickly velocity increases
 
   // Detect mobile
   useEffect(() => {
@@ -40,6 +52,40 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
       document.removeEventListener('scroll', preventScrolling)
     }
   }, [dragState.isDragging])
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (!autoScroll.active || !dragState.isDragging) {
+      if (autoScrollRaf.current) {
+        cancelAnimationFrame(autoScrollRaf.current)
+        autoScrollRaf.current = null
+      }
+      return
+    }
+
+    const scrollContainer = containerRef.current?.parentElement
+    if (!scrollContainer) return
+
+    const performScroll = () => {
+      if (autoScroll.active && scrollContainer) {
+        scrollContainer.scrollBy({
+          top: autoScroll.direction.y,
+          left: 0,
+          behavior: 'auto'
+        })
+
+        autoScrollRaf.current = requestAnimationFrame(performScroll)
+      }
+    }
+
+    autoScrollRaf.current = requestAnimationFrame(performScroll)
+
+    return () => {
+      if (autoScrollRaf.current) {
+        cancelAnimationFrame(autoScrollRaf.current)
+      }
+    }
+  }, [autoScroll.active, autoScroll.direction, dragState.isDragging])
 
   const handleDragStart = (index, pos) => {
     // Haptic feedback on mobile - stronger pulse
@@ -71,6 +117,9 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
       onPatternCopy(dragState.sourceIndex, dragState.hoveredIndex)
     }
 
+    // Stop auto-scroll
+    setAutoScroll({ active: false, direction: { x: 0, y: 0 }, velocity: 1 })
+
     setDragState({
       isDragging: false,
       sourceIndex: null,
@@ -98,6 +147,32 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         const index = parseInt(squareElement.getAttribute('data-square-index'))
         handleSquareHover(index)
       }
+
+      // Edge-based auto-scroll
+      if (isMobile && mobileMode === 'drag') {
+        const scrollContainer = containerRef.current?.parentElement
+        if (!scrollContainer) return
+
+        const viewportHeight = window.innerHeight
+        const distanceFromTop = touch.clientY
+        const distanceFromBottom = viewportHeight - touch.clientY
+
+        let scrollY = 0
+
+        if (distanceFromTop < EDGE_SCROLL_ZONE) {
+          const proximity = 1 - (distanceFromTop / EDGE_SCROLL_ZONE)
+          scrollY = -1 * (MIN_SCROLL_VELOCITY + (MAX_SCROLL_VELOCITY - MIN_SCROLL_VELOCITY) * Math.pow(proximity, VELOCITY_RAMP))
+        } else if (distanceFromBottom < EDGE_SCROLL_ZONE) {
+          const proximity = 1 - (distanceFromBottom / EDGE_SCROLL_ZONE)
+          scrollY = (MIN_SCROLL_VELOCITY + (MAX_SCROLL_VELOCITY - MIN_SCROLL_VELOCITY) * Math.pow(proximity, VELOCITY_RAMP))
+        }
+
+        if (scrollY !== 0) {
+          setAutoScroll({ active: true, direction: { x: 0, y: scrollY }, velocity: 1 })
+        } else {
+          setAutoScroll({ active: false, direction: { x: 0, y: 0 }, velocity: 1 })
+        }
+      }
     }
   }
 
@@ -108,9 +183,9 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         className="quilt-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(6, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           gridAutoRows: '1fr',
-          width: isMobile ? 'max(100%, 642px)' : '100%',
+          width: '100%',
           position: 'relative',
           touchAction: isPreviewMode ? 'auto' : (dragState.isDragging ? 'none' : 'manipulation'),
           contain: 'layout paint',
@@ -183,6 +258,45 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
               ))
             )}
           </div>
+        </div>
+      )}
+
+      {/* Edge scroll zone indicators */}
+      {dragState.isDragging && isMobile && mobileMode === 'drag' && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: 'none',
+          zIndex: 999
+        }}>
+          {/* Top zone */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '60px',
+            background: autoScroll.direction.y < 0
+              ? 'linear-gradient(to bottom, rgba(59, 130, 246, 0.15), transparent)'
+              : 'linear-gradient(to bottom, rgba(59, 130, 246, 0.05), transparent)',
+            transition: 'background 0.15s ease'
+          }} />
+
+          {/* Bottom zone */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '60px',
+            background: autoScroll.direction.y > 0
+              ? 'linear-gradient(to top, rgba(59, 130, 246, 0.15), transparent)'
+              : 'linear-gradient(to top, rgba(59, 130, 246, 0.05), transparent)',
+            transition: 'background 0.15s ease'
+          }} />
         </div>
       )}
     </>

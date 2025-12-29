@@ -6,7 +6,7 @@ import { db } from './firebase'
 
 function App() {
   const [squares, setSquares] = useState(
-    Array(36).fill(null).map(() =>
+    Array(30).fill(null).map(() =>
       Array(16).fill(null).map(() => Array(16).fill('#F5EFEE'))
     )
   )
@@ -200,8 +200,8 @@ function App() {
 
         <div style={{
           overflow: isPreviewMode ? 'visible' : 'auto',
-          overflowX: mobileMode === 'drag' ? 'hidden' : 'auto',
-          overflowY: mobileMode === 'drag' ? 'hidden' : 'auto',
+          overflowX: 'hidden',
+          overflowY: 'auto',
           width: '100%',
           height: isPreviewMode ? 'auto' : 'auto',
           maxHeight: isPreviewMode ? 'none' : 'calc(var(--app-height, 100vh) - 150px)',
@@ -278,14 +278,35 @@ function App() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 style={{
+              <span style={{
                 fontSize: '24px',
-                fontWeight: 'bold',
                 color: '#1f2937',
                 marginBottom: '20px'
               }}>
-                It&apos;s Meg&apos;s birthday
-              </h2>
+<>
+      <p>Hello!</p>
+
+      <p>This is my 6th annual birthday website (wah!).</p>
+      
+      <p>
+        This year, we're collaboratively creating a pixel art piece! Then I'll be getting the piece 
+        woven by the good folks at{' '}
+        <a href="https://photoweavers.com/collections/all-products/products/60-x-50-small-woven-throw-portrait" style={{
+                color: '#006affff',
+borderBottom: '1px'              }}>
+          a North Carolina based mill
+        </a>{' '}
+        using a Jacquard loom; a reference to programming's origins in weaving and a love letter to{' '}
+        <a href="http://red-green-blue.com/kid-pix-the-early-years">KidPix</a>, pixel art 
+        (shoutout to Susan Kare's iconic work), and geometric designs in folk art.
+      </p>
+      
+      <p>
+        This year was big one for me and next year is shaping up the same way. I'll treasure having your wishes and doodles as a tangible, snuggalable object. 
+      </p>
+      
+      <p>Meghna</p>
+    </>              </span>
               <button
                 onClick={() => setShowChatModal(false)}
                 style={{
