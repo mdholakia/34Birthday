@@ -5,7 +5,7 @@ const HORIZONTAL_DRAG_THRESHOLD = 25 // px
 const VERTICAL_SCROLL_THRESHOLD = 35 // px
 const CANCEL_THRESHOLD = 10 // px
 
-function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isPoweredUp = false, isMobile = false, mobileMode = 'scroll' }) {
+function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isHovered, index, isPreviewMode = false, isMobile = false, mobileMode = 'scroll' }) {
   const [isHovering, setIsHovering] = useState(false)
   const touchStartPos = useRef(null)
   const touchMode = useRef(null) // 'drag' | 'scroll' | null
@@ -148,8 +148,8 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
           width: '100%',
           height: '100%',
           display: 'grid',
-          gridTemplateColumns: 'repeat(16, 1fr)',
-          gridTemplateRows: 'repeat(16, 1fr)',
+          gridTemplateColumns: 'repeat(15, 1fr)',
+          gridTemplateRows: 'repeat(15, 1fr)',
           gap: '0',
           lineHeight: '0',
           imageRendering: 'pixelated',
@@ -179,90 +179,6 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         {/* Visual indicator for drag corner */}
         {!isPreviewMode && (
         <>
-          <style>{`
-            @keyframes teardropGrow {
-              0% {
-                transform: scaleY(0);
-                opacity: 0;
-              }
-              15% {
-                opacity: 0.8;
-              }
-              50% {
-                transform: scaleY(1);
-                opacity: 0.6;
-              }
-              100% {
-                transform: scaleY(1.1);
-                opacity: 0;
-              }
-            }
-          `}</style>
-
-
-          {/* Drag trail tutorial (only on first edit) */}
-          {isPoweredUp && (
-            <svg
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '200%',
-                height: '200%',
-                overflow: 'visible',
-                pointerEvents: 'none',
-                zIndex: 3
-              }}
-              viewBox="0 0 200 200"
-            >
-              <defs>
-                <linearGradient id="teardropGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(59, 130, 246, 0.9)" />
-                  <stop offset="70%" stopColor="rgba(59, 130, 246, 0.5)" />
-                  <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
-                </linearGradient>
-                <filter id="teardropGlow">
-                  <feGaussianBlur stdDeviation="2" />
-                </filter>
-              </defs>
-
-              {/* Trail 1: Up (270°) */}
-              <path
-                d={`M ${isMobile ? '5' : '4'} 0 Q ${isMobile ? '5' : '4'} -60 ${isMobile ? '5' : '4'} -120 Q ${isMobile ? '5' : '4'} -60 ${isMobile ? '5' : '4'} 0 Z`}
-                fill="url(#teardropGradient)"
-                filter="url(#teardropGlow)"
-                style={{
-                  transformOrigin: '50% 0%',
-                  transform: 'rotate(270deg)',
-                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
-                }}
-              />
-
-              {/* Trail 2: Right (0°) */}
-              <path
-                d={`M 0 ${isMobile ? '-5' : '-4'} Q 60 ${isMobile ? '-5' : '-4'} 120 ${isMobile ? '-5' : '-4'} Q 60 ${isMobile ? '-5' : '-4'} 0 ${isMobile ? '-5' : '-4'} Z`}
-                fill="url(#teardropGradient)"
-                filter="url(#teardropGlow)"
-                style={{
-                  transformOrigin: '0% 50%',
-                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
-                }}
-              />
-
-              {/* Trail 3: Diagonal (315°) */}
-              <path
-                d={`M 0 0 Q 42 -42 85 -85 Q 42 -42 0 0 Z`}
-                fill="url(#teardropGradient)"
-                filter="url(#teardropGlow)"
-                style={{
-                  transformOrigin: '0% 0%',
-                  transform: 'rotate(315deg)',
-                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
-                }}
-              />
-            </svg>
-          )}
-
           {/* Copy icon on desktop hover */}
           {!isMobile && isHovering && (
             <div style={{

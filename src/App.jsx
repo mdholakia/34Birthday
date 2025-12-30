@@ -9,17 +9,17 @@ import { db } from './firebase'
 function App() {
   const [squares, setSquares] = useState(
     Array(30).fill(null).map(() =>
-      Array(16).fill(null).map(() => Array(16).fill('#F5EFEE'))
+      Array(15).fill(null).map(() => Array(15).fill('#F5EFEE'))
     )
   )
   const [history, setHistory] = useState([])
   const [editingSquare, setEditingSquare] = useState(null)
   const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [showChatModal, setShowChatModal] = useState(false)
-  const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
   const [mobileMode, setMobileMode] = useState('drag') // 'scroll' | 'drag'
-  const [hasEditedBefore, setHasEditedBefore] = useState(false)
+  const [editCount, setEditCount] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
 
   // Freeze viewport height on mount to prevent mobile browser recalculations
@@ -77,22 +77,6 @@ function App() {
     newSquares[index] = newPixels
     setSquares(newSquares)
     set(ref(db, 'squares'), newSquares)
-
-    // Only show animation on first edit
-    if (!hasEditedBefore) {
-      setHasEditedBefore(true)
-      // Add powerup animation to this square
-      setPoweredUpSquares(prev => new Set([...prev, index]))
-
-      // Remove powerup after 3 seconds
-      setTimeout(() => {
-        setPoweredUpSquares(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(index)
-          return newSet
-        })
-      }, 3000)
-    }
   }
 
   const copySquarePattern = (fromIndex, toIndex) => {
@@ -104,14 +88,8 @@ function App() {
     setSquares(newSquares)
     set(ref(db, 'squares'), newSquares)
 
-    // Remove powerup from source square (it's been used!)
-    setPoweredUpSquares(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(fromIndex)
-      return newSet
-    })
-
     // Show toast
+    setToastMessage('Pattern copied! Press Cmd+Z to undo')
     setShowToast(true)
     setTimeout(() => setShowToast(false), 3000)
   }
@@ -172,7 +150,8 @@ function App() {
           style={{
             fontSize: window.innerWidth < 375 ? '22px' : '28px',
             margin: 0,
-            color: 'white'
+            color: 'white',
+            fontFamily: 'PPMondwest, sans-serif'
           }}>
             Pixel Quilt
           </h1>
@@ -280,7 +259,6 @@ function App() {
             onSquareClick={(index) => setEditingSquare(index)}
             onPatternCopy={copySquarePattern}
             isPreviewMode={isPreviewMode}
-            poweredUpSquares={poweredUpSquares}
             mobileMode={mobileMode}
           />
         </div>
@@ -288,8 +266,9 @@ function App() {
         {showToast && (
           <div style={{
             position: 'fixed',
-            bottom: '20px',
-            right: '20px',
+            top: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
             backgroundColor: '#1f2937',
             color: 'white',
             padding: '12px 20px',
@@ -298,7 +277,7 @@ function App() {
             zIndex: 1000,
             fontSize: '14px'
           }}>
-            Pattern copied! Press Cmd+Z to undo
+            {toastMessage}
           </div>
         )}
 
@@ -310,6 +289,14 @@ function App() {
             onSave={(newPixels) => {
               updateSquare(editingSquare, newPixels)
               setEditingSquare(null)
+
+              // Show drag tutorial toast for first two edits
+              if (editCount < 2) {
+                setEditCount(prev => prev + 1)
+                setToastMessage('Drag square to copy your design')
+                setShowToast(true)
+                setTimeout(() => setShowToast(false), 3000)
+              }
             }}
             onClose={() => setEditingSquare(null)}
           />
@@ -351,12 +338,11 @@ function App() {
                 color: '#1f2937',
                 lineHeight: '1.6'
               }}>
-                <p>Welcome friend!</p>
-
-                <p>This is my 6th annual birthday website (wah!).</p>
+                <p>Welcome to my 6th annual birthday website!</p>
 
                 <p>
-                  This year, we're collaboratively creating a pixel art piece!  I'll be getting the piece
+                  This year, we're collaboratively creating a pixel art piece! 
+                   I'll be getting the piece
                   woven by the good folks at{' '}
                   <a href="https://photoweavers.com/collections/all-products/products/60-x-50-small-woven-throw-portrait" style={{
                     color: '#006affff',
@@ -369,7 +355,7 @@ function App() {
                     color: '#006affff',
                     textDecoration: 'underline'
                   }}>KidPix</a>, pixel art
-                  (shoutout to Susan Kare's iconic work for Mac + videogames), and geometric designs in folk art.
+                  (shoutout to Susan Kare, videogames, and geometric designs in folk art.)
                 </p>
 
                 <p>

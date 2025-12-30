@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'PPMondwest';
+  src: url('/src/PPMondwest-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   font-family: 'Inter', sans-serif;
 }

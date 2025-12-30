@@ -17,7 +17,7 @@ const COLORS = [
   { value: '#484D88' }, // dark blue
 ]
 
-const GRID_SIZE = 16
+const GRID_SIZE = 15
 const DEBOUNCE_DELAY = 500 // ms
 
 function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
