@@ -180,36 +180,21 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
         {!isPreviewMode && (
         <>
           <style>{`
-            @keyframes dragTrailDot {
+            @keyframes teardropGrow {
               0% {
-                transform: translate(0, -100%);
-                opacity: 1;
+                transform: scaleY(0);
+                opacity: 0;
               }
-              70% {
-                opacity: 1;
+              15% {
+                opacity: 0.8;
+              }
+              50% {
+                transform: scaleY(1);
+                opacity: 0.6;
               }
               100% {
-                transform: translate(0, 200%);
+                transform: scaleY(1.1);
                 opacity: 0;
-              }
-            }
-
-            @keyframes dragTrailFade {
-              0% {
-                opacity: 0;
-                height: 0%;
-              }
-              30% {
-                opacity: 0.4;
-                height: 20%;
-              }
-              60% {
-                opacity: 0.3;
-                height: 50%;
-              }
-              100% {
-                opacity: 0;
-                height: 80%;
               }
             }
           `}</style>
@@ -217,36 +202,65 @@ function QuiltSquare({ pixels, onClick, onDragStart, onMouseEnter, isSource, isH
 
           {/* Drag trail tutorial (only on first edit) */}
           {isPoweredUp && (
-            <>
-              {/* Animated dot that drags down */}
-              <div style={{
+            <svg
+              style={{
                 position: 'absolute',
-                bottom: '0',
-                left: '0',
-                width: isMobile ? '16px' : '12px',
-                height: isMobile ? '16px' : '12px',
+                bottom: 0,
+                left: 0,
+                width: '200%',
+                height: '200%',
+                overflow: 'visible',
                 pointerEvents: 'none',
-                animation: 'dragTrailDot 2s ease-in-out infinite',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(59, 130, 246, 0.9)',
-                boxShadow: '0 0 8px rgba(59, 130, 246, 0.6)',
-                transformOrigin: 'center',
                 zIndex: 3
-              }} />
+              }}
+              viewBox="0 0 200 200"
+            >
+              <defs>
+                <linearGradient id="teardropGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(59, 130, 246, 0.9)" />
+                  <stop offset="70%" stopColor="rgba(59, 130, 246, 0.5)" />
+                  <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
+                </linearGradient>
+                <filter id="teardropGlow">
+                  <feGaussianBlur stdDeviation="2" />
+                </filter>
+              </defs>
 
-              {/* Trail that follows the dot */}
-              <div style={{
-                position: 'absolute',
-                bottom: '0',
-                left: isMobile ? '8px' : '6px',
-                width: '2px',
-                pointerEvents: 'none',
-                animation: 'dragTrailFade 2s ease-in-out infinite',
-                background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.6), transparent)',
-                transformOrigin: 'bottom',
-                zIndex: 2
-              }} />
-            </>
+              {/* Trail 1: Up (270°) */}
+              <path
+                d={`M ${isMobile ? '5' : '4'} 0 Q ${isMobile ? '5' : '4'} -60 ${isMobile ? '5' : '4'} -120 Q ${isMobile ? '5' : '4'} -60 ${isMobile ? '5' : '4'} 0 Z`}
+                fill="url(#teardropGradient)"
+                filter="url(#teardropGlow)"
+                style={{
+                  transformOrigin: '50% 0%',
+                  transform: 'rotate(270deg)',
+                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
+                }}
+              />
+
+              {/* Trail 2: Right (0°) */}
+              <path
+                d={`M 0 ${isMobile ? '-5' : '-4'} Q 60 ${isMobile ? '-5' : '-4'} 120 ${isMobile ? '-5' : '-4'} Q 60 ${isMobile ? '-5' : '-4'} 0 ${isMobile ? '-5' : '-4'} Z`}
+                fill="url(#teardropGradient)"
+                filter="url(#teardropGlow)"
+                style={{
+                  transformOrigin: '0% 50%',
+                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
+                }}
+              />
+
+              {/* Trail 3: Diagonal (315°) */}
+              <path
+                d={`M 0 0 Q 42 -42 85 -85 Q 42 -42 0 0 Z`}
+                fill="url(#teardropGradient)"
+                filter="url(#teardropGlow)"
+                style={{
+                  transformOrigin: '0% 0%',
+                  transform: 'rotate(315deg)',
+                  animation: 'teardropGrow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
+                }}
+              />
+            </svg>
           )}
 
           {/* Copy icon on desktop hover */}

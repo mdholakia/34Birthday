@@ -32,7 +32,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const [justFilled, setJustFilled] = useState(false)
   const [localHistory, setLocalHistory] = useState([])
   const [isShortViewport, setIsShortViewport] = useState(() => typeof window !== 'undefined' && window.innerHeight < 700)
-  const [canvasSize, setCanvasSize] = useState(600)
 
   // Drawing session tracking for debounced undo
   const drawingSessionStartRef = useRef(null)
@@ -53,20 +52,6 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
     window.addEventListener('resize', checkViewportHeight)
     return () => window.removeEventListener('resize', checkViewportHeight)
   }, [])
-
-  // Calculate dynamic canvas size for mobile - disabled, using CSS instead
-  useEffect(() => {
-    if (!isMobile) return
-
-    // Set to viewport width to make it responsive
-    const calculateCanvasSize = () => {
-      setCanvasSize(Math.min(window.innerWidth, 600))
-    }
-
-    calculateCanvasSize()
-    window.addEventListener('resize', calculateCanvasSize)
-    return () => window.removeEventListener('resize', calculateCanvasSize)
-  }, [isMobile])
 
   // Cleanup debounce timeout on unmount
   useEffect(() => {
@@ -512,7 +497,7 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            paddingBottom: isShortViewport ? '4px' : '0'
+            padding: isShortViewport ? '6px 6px' : '0'
           }}>
             {COLORS.map((color) => (
               <button
@@ -553,19 +538,21 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
             alignItems: 'center',
             justifyContent: 'flex-start',
             padding: '8px 0',
-            overflow: 'auto',
-            minHeight: 0
+            overflow: 'hidden',
+            minHeight: 0,
+            maxHeight: '100%'
           }}
         >
           {/* Canvas container */}
           <div
             style={{
               touchAction: 'none',
-              width: `min(100vw, ${canvasSize}px, 100%)`,
+              width: '100%',
+              maxWidth: '600px',
               aspectRatio: '1',
               margin: '0 auto',
-              flexShrink: 1,
-              maxHeight: '100%'
+              maxHeight: 'calc(100% - 60px)',
+              objectFit: 'contain'
             }}
             onMouseDown={() => setIsDrawing(true)}
             onMouseUp={() => setIsDrawing(false)}

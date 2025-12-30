@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import QuiltGrid from './components/QuiltGrid'
 import PixelEditor from './components/PixelEditor'
+import UndoIcon from './assets/icons/UndoIcon'
+import EyeIcon from './assets/icons/EyeIcon'
 import { ref, set, onValue } from 'firebase/database'
 import { db } from './firebase'
 
@@ -18,6 +20,7 @@ function App() {
   const [poweredUpSquares, setPoweredUpSquares] = useState(new Set())
   const [mobileMode, setMobileMode] = useState('drag') // 'scroll' | 'drag'
   const [hasEditedBefore, setHasEditedBefore] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   // Freeze viewport height on mount to prevent mobile browser recalculations
   useEffect(() => {
@@ -44,6 +47,23 @@ function App() {
       clearTimeout(resizeTimeout)
       window.removeEventListener('resize', handleResize)
       document.body.style.overscrollBehavior = ''
+    }
+  }, [])
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Show chat modal on first visit
+  useEffect(() => {
+    const hasVisitedBefore = localStorage.getItem('hasVisitedPixelQuilt')
+    if (!hasVisitedBefore) {
+      setShowChatModal(true)
+      localStorage.setItem('hasVisitedPixelQuilt', 'true')
     }
   }, [])
 
@@ -140,7 +160,7 @@ function App() {
         <div style={{
           display: 'flex',
           color: 'white',
-          backgroundColor: '#c4a1a1ff',
+          backgroundColor: '#121212',
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '2px solid #e5e7eb',
@@ -148,10 +168,11 @@ function App() {
           gap: '8px',
           flexWrap: 'wrap'
         }}>
-          <h1 className="text-3xl font-bold text-gray-900"
+          <h1 className="text-3xl font-bold"
           style={{
             fontSize: window.innerWidth < 375 ? '22px' : '28px',
-            margin: 0
+            margin: 0,
+            color: 'white'
           }}>
             Pixel Quilt
           </h1>
@@ -167,8 +188,8 @@ function App() {
                 style={{
                   height: '44px',
                   padding: '10px 14px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: 'transparent',
+                  color: 'white',
                   border: '2px solid #6b7280',
                   borderRadius: '6px',
                   fontSize: '15px',
@@ -182,7 +203,7 @@ function App() {
                 }}
                 title="Undo"
               >
-                <span style={{ fontSize: '20px' }}>⏪</span>
+                <UndoIcon color="white" size={20} />
                 <span>Undo</span>
               </button>
             )}
@@ -193,8 +214,8 @@ function App() {
                 minWidth: '44px',
                 height: '44px',
                 padding: '10px',
-                backgroundColor: '#ffffff',
-                color: '#1f2937',
+                backgroundColor: 'transparent',
+                color: 'white',
                 border: '2px solid #6b7280',
                 borderRadius: '6px',
                 fontSize: '20px',
@@ -209,15 +230,15 @@ function App() {
               💬
             </button>
 
-            {editingSquare === null && (
+            {editingSquare === null && !isMobile && (
               <button
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
                 style={{
                   height: '44px',
                   padding: '10px 14px',
-                  backgroundColor: isPreviewMode ? '#3b82f6' : '#ffffff',
-                  color: isPreviewMode ? '#ffffff' : '#1f2937',
-                  border: '2px solid #3b82f6',
+                  backgroundColor: isPreviewMode ? '#3b82f6' : 'transparent',
+                  color: isPreviewMode ? '#ffffff' : 'white',
+                  border: isPreviewMode ? '2px solid #3b82f6' : '2px solid #6b7280',
                   borderRadius: '6px',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -229,7 +250,11 @@ function App() {
                   whiteSpace: 'nowrap'
                 }}
               >
-                <span>{isPreviewMode ? '✓' : '👁'}</span>
+                {isPreviewMode ? (
+                  <span>✓</span>
+                ) : (
+                  <EyeIcon color="white" size={20} />
+                )}
                 <span style={{ display: window.innerWidth < 375 ? 'none' : 'inline' }}>
                   {isPreviewMode ? 'Exit Preview' : 'Preview'}
                 </span>
@@ -243,7 +268,7 @@ function App() {
           style={{
             overflow: 'visible',
             width: '100%',
-            height: 'auto',
+            height: isPreviewMode ? 'calc(100vh - 80px)' : 'auto',
             display: isPreviewMode ? 'flex' : 'block',
             alignItems: isPreviewMode ? 'center' : 'stretch',
             justifyContent: isPreviewMode ? 'center' : 'flex-start',
@@ -302,51 +327,57 @@ function App() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 2000
+              zIndex: 2000,
+              padding: isMobile ? '20px' : '0'
             }}
             onClick={() => setShowChatModal(false)}
           >
             <div
               style={{
                 backgroundColor: 'white',
-                padding: '40px',
+                padding: isMobile ? '24px' : '40px',
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
                 maxWidth: '500px',
                 width: '90%',
-                textAlign: 'center'
+                textAlign: 'left',
+                maxHeight: isMobile ? '90vh' : 'auto',
+                overflowY: isMobile ? 'auto' : 'visible'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <span style={{
-                fontSize: '24px',
+              <div style={{
+                fontSize: isMobile ? '14px' : '16px',
                 color: '#1f2937',
-                marginBottom: '20px'
+                lineHeight: '1.6'
               }}>
-<>
-      <p>Welcome friend!</p>
+                <p>Welcome friend!</p>
 
-      <p>This is my 6th annual birthday website (wah!).</p>
-      
-      <p>
-        This year, we're collaboratively creating a pixel art piece!  I'll be getting the piece 
-        woven by the good folks at{'Pure Country Weavers '}
-        <a href="https://photoweavers.com/collections/all-products/products/60-x-50-small-woven-throw-portrait" style={{
-                color: '#006affff',
-borderBottom: '1px'              }}>
-          a North Carolina based mill
-        </a>{' '}
-        using a Jacquard loom; a reference to programming's origins in weaving. This is also a love letter to{' '}
-        <a href="http://red-green-blue.com/kid-pix-the-early-years">KidPix</a>, pixel art 
-        (shoutout to Susan Kare's iconic work for Mac + videogames), and geometric designs in folk art.
-      </p>
-      
-      <p>
-        This year was big one for me and next year is shaping up the same way. I'll treasure having your wishes and doodles as a tangible, snuggalable object. 
-      </p>
-        <p>all my love,</p>
-      <p>Meghna</p>
-    </>              </span>
+                <p>This is my 6th annual birthday website (wah!).</p>
+
+                <p>
+                  This year, we're collaboratively creating a pixel art piece!  I'll be getting the piece
+                  woven by the good folks at{' '}
+                  <a href="https://photoweavers.com/collections/all-products/products/60-x-50-small-woven-throw-portrait" style={{
+                    color: '#006affff',
+                    textDecoration: 'underline'
+                  }}>
+                    a North Carolina based mill
+                  </a>{' '}
+                  using a Jacquard loom; a reference to programming's origins in weaving. This is also a love letter to{' '}
+                  <a href="http://red-green-blue.com/kid-pix-the-early-years" style={{
+                    color: '#006affff',
+                    textDecoration: 'underline'
+                  }}>KidPix</a>, pixel art
+                  (shoutout to Susan Kare's iconic work for Mac + videogames), and geometric designs in folk art.
+                </p>
+
+                <p>
+                  This year was big one for me and next year is shaping up the same way. I'll treasure having your wishes and doodles as a tangible, snuggalable object.
+                </p>
+                <p>all my love,</p>
+                <p>Meghna</p>
+              </div>
               <button
                 onClick={() => setShowChatModal(false)}
                 style={{
@@ -358,7 +389,8 @@ borderBottom: '1px'              }}>
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  marginTop: '10px'
+                  marginTop: '20px',
+                  width: '100%'
                 }}
               >
                 Close

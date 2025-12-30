@@ -9,14 +9,14 @@ const UndoIcon = ({ color = '#B3B3B3', size = 16 }) => (
     <path
       d="M7 10.3333L1 5.66667L7 1.00001V10.3333Z"
       stroke={color}
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M14.3333 10.3333L8.33333 5.66667L14.3333 1.00001V10.3333Z"
       stroke={color}
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
