@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "snapshot:create": "node scripts/create-snapshot.js",
+    "snapshot:restore": "node scripts/restore-snapshot.js",
+    "migrate:expand": "node scripts/migration-expand-grid.js",
+    "migrate:rollback": "node scripts/rollback-to-30.js"
   },
   "dependencies": {
     "firebase": "^12.7.0",

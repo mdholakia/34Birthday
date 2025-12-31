@@ -8,7 +8,7 @@ import { db } from './firebase'
 
 function App() {
   const [squares, setSquares] = useState(
-    Array(30).fill(null).map(() =>
+    Array(48).fill(null).map(() =>
       Array(15).fill(null).map(() => Array(15).fill('#F5EFEE'))
     )
   )

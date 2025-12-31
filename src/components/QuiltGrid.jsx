@@ -183,11 +183,11 @@ function QuiltGrid({ squares, onSquareClick, onPatternCopy, isPreviewMode = fals
         className="quilt-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: 'repeat(6, 1fr)',
           gridAutoRows: '1fr',
-          width: isPreviewMode ? 'min(100%, calc(100vh - 80px) * 5 / 6)' : '100%',
+          width: isPreviewMode ? 'min(100%, calc(100vh - 80px) * 6 / 8)' : '100%',
           maxHeight: isPreviewMode ? 'calc(100vh - 80px)' : 'none',
-          aspectRatio: isPreviewMode ? '5 / 6' : 'auto',
+          aspectRatio: isPreviewMode ? '6 / 8' : 'auto',
           position: 'relative',
           touchAction: isPreviewMode ? 'auto' : (dragState.isDragging ? 'none' : 'manipulation'),
           contain: 'layout paint',

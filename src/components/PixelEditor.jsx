@@ -65,9 +65,9 @@ function PixelEditor({ pixels, allSquares, squareIndex, onSave, onClose }) {
   const HALO_SIZE = isMobile ? 1 : 4
   const TOTAL_SIZE = HALO_SIZE + GRID_SIZE + HALO_SIZE
 
-  // Calculate adjacent square indices (5-column layout)
+  // Calculate adjacent square indices (6-column layout)
   const adjacentSquares = useMemo(() => {
-    const cols = 5
+    const cols = 6
     const total = allSquares.length
 
     const top = squareIndex >= cols ? squareIndex - cols : null
